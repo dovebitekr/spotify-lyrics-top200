@@ -20,4 +20,3 @@ def add_lyrics_by_title(title, artist, id):
     with sq.connect("lyrics.db") as conn:
         conn.execute("""INSERT INTO Lyrics (
             song_id, lyrics) VALUES(?,?)""",(id, lyrics))
-
