@@ -1,4 +1,8 @@
 .env
 spotify_data
 venv
+.venv
+.vscode/
 .python-version
+__pycache__/
+*.py[cod]

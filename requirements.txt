@@ -8,3 +8,6 @@ requests==2.34.2
 soupsieve==2.9.2
 typing_extensions==4.16.0
 urllib3==2.8.0
+pandas>=2.0.0
+langdetect>=1.0.9
+lingua-language-detector>=2.0.0

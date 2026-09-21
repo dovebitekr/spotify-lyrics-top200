@@ -26,7 +26,8 @@ def main():
         try:
             song = genius.search_song(track_name, artist_name)
             lyrics_list.append(song.lyrics if song and song.lyrics else None)
-        except:
+        except Exception as e:
+            print(f"Warning: Failed to fetch lyrics for {track_name}: {e}")
             lyrics_list.append(None)
         time.sleep(0.3)
         
