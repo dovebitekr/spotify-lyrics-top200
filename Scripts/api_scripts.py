@@ -1,19 +1,17 @@
 import os
-import csv
 from dotenv import load_dotenv
 import lyricsgenius
 
 load_dotenv()
-USER = os.getenv("ID")
-KEY = os.getenv("SECRET")
-TOKEN = os.getenv("TOKEN")
+TOKEN = os.getenv("GENIUS_ACCESS_TOKEN") or os.getenv("TOKEN")
 
-def get_lyrics(artist, title):
-    genius = lyricsgenius.Genius(TOKEN)
-    song = genius.search_song(
-        f"{title}",
-        f"{artist}"
-    )
-    if song:
-        return song.lyrics
-    return None
+
+def get_lyrics(title: str, artist: str):
+    """Fetch lyrics from Genius API for a given title and artist."""
+    if not TOKEN:
+        raise ValueError("GENIUS_ACCESS_TOKEN not found in environment.")
+
+    genius = lyricsgenius.Genius(TOKEN, timeout=10, retries=2)
+    genius.verbose = False
+    song = genius.search_song(title, artist)
+    return song.lyrics if song else None

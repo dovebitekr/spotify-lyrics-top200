@@ -1,12 +1,18 @@
-import pandas as pd
 import sqlite3
-import os
+import pandas as pd
+from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).resolve().parent
+DB_PATH = PROJECT_ROOT / "lyrics.db"
+CSV_PATH = PROJECT_ROOT / "spotify_data" / "final_dataset_for_ml_enriched.csv"
+
 
 def build_db():
-    print("Building database structure...")
-    with sqlite3.connect("lyrics.db") as conn:
-        conn.execute("DROP TABLE IF EXISTS Songs")
+    """Create empty relational tables (Songs and Lyrics) in SQLite."""
+    with sqlite3.connect(DB_PATH) as conn:
         conn.execute("DROP TABLE IF EXISTS Lyrics")
+        conn.execute("DROP TABLE IF EXISTS Songs")
+
         conn.execute("""
             CREATE TABLE Songs (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -20,9 +26,11 @@ def build_db():
                 genre TEXT,
                 language TEXT,
                 word_count INTEGER,
-                repetition_rate REAL
+                repetition_rate REAL,
+                track_type TEXT
             )
         """)
+
         conn.execute("""
             CREATE TABLE Lyrics (
                 song_id INTEGER PRIMARY KEY,
@@ -31,22 +39,23 @@ def build_db():
             )
         """)
 
+
 def load_data_to_db():
-    csv_path = 'spotify_data/final_dataset_for_ml_enriched.csv'
-    if not os.path.exists(csv_path):
-        print(f"Error: {csv_path} not found.")
-        return
-        
-    print("Loading enriched dataset into SQLite Database...")
-    df = pd.read_csv(csv_path)
-    
-    with sqlite3.connect("lyrics.db") as conn:
+    """Read the enriched CSV dataset and populate the database tables."""
+    if not CSV_PATH.exists():
+        raise FileNotFoundError(f"Source dataset not found: {CSV_PATH}")
+
+    df = pd.read_csv(CSV_PATH)
+
+    with sqlite3.connect(DB_PATH) as conn:
         cursor = conn.cursor()
-        
-        for idx, row in df.iterrows():
+        for _, row in df.iterrows():
             cursor.execute("""
-                INSERT INTO Songs (artist, title, best_rank, all_time_peak_rank, all_time_weeks, total_streams, release_year, genre, language, word_count, repetition_rate)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO Songs (
+                    artist, title, best_rank, all_time_peak_rank, 
+                    all_time_weeks, total_streams, release_year, 
+                    genre, language, word_count, repetition_rate, track_type
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 row['artist_names'],
                 row['track_name'],
@@ -58,17 +67,15 @@ def load_data_to_db():
                 row.get('genre'),
                 row.get('language'),
                 row.get('word_count'),
-                row.get('repetition_rate')
+                row.get('repetition_rate'),
+                row.get('track_type', 'standard')
             ))
-            
+
             song_id = cursor.lastrowid
-            
-            cursor.execute("""
-                INSERT INTO Lyrics (song_id, lyrics)
-                VALUES (?, ?)
-            """, (song_id, row['lyrics']))
-            
-    print("Successfully populated lyrics.db with all tracks and lyrics!")
+            cursor.execute("INSERT INTO Lyrics (song_id, lyrics) VALUES (?, ?)", (song_id, row['lyrics']))
+
+    print(f"Successfully loaded {len(df)} tracks into {DB_PATH.name}.")
+
 
 if __name__ == "__main__":
     build_db()
