@@ -6,3 +6,7 @@ venv
 .python-version
 __pycache__/
 *.py[cod]
+
+# Local exploratory files and backups
+meta/
+sandbox.ipynb
