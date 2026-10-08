@@ -127,16 +127,16 @@ def fetch_lyrics(title: str, artist: str, genius_client) -> str:
 
 
 def compute_nlp_metrics(lyrics: str):
-    """Calculate word count, repetition rate, and detected language for lyrics."""
+    """Calculate word count, lexical diversity (Type-Token Ratio), and detected language."""
     if pd.isna(lyrics) or not str(lyrics).strip() or str(lyrics).strip().lower() == 'nan':
         return 0, 0.0, "missing"
 
     words = str(lyrics).lower().split()
     word_count = len(words)
     unique_words = len(set(words))
-    repetition_rate = round(unique_words / word_count, 3) if word_count > 0 else 0.0
+    lexical_diversity = round(unique_words / word_count, 3) if word_count > 0 else 0.0
     lang = detect_language(lyrics)
-    return word_count, repetition_rate, lang
+    return word_count, lexical_diversity, lang
 
 
 def determine_track_type(row) -> str:
@@ -207,7 +207,7 @@ def main():
     df['release_year'] = pd.Series(years, dtype='Int64')
     df['genre'] = genres
     df['word_count'] = word_counts
-    df['repetition_rate'] = rep_rates
+    df['lexical_diversity'] = rep_rates
     df['language'] = languages
 
     # Classify track types

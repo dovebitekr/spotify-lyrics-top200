@@ -26,7 +26,7 @@ def build_db():
                 genre TEXT,
                 language TEXT,
                 word_count INTEGER,
-                repetition_rate REAL,
+                lexical_diversity REAL,
                 track_type TEXT
             )
         """)
@@ -54,7 +54,7 @@ def load_data_to_db():
                 INSERT INTO Songs (
                     artist, title, best_rank, all_time_peak_rank, 
                     all_time_weeks, total_streams, release_year, 
-                    genre, language, word_count, repetition_rate, track_type
+                    genre, language, word_count, lexical_diversity, track_type
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 row['artist_names'],
@@ -67,7 +67,7 @@ def load_data_to_db():
                 row.get('genre') if pd.notna(row.get('genre')) else None,
                 row.get('language'),
                 row.get('word_count'),
-                row.get('repetition_rate'),
+                row.get('lexical_diversity', row.get('repetition_rate')),
                 row.get('track_type', 'standard')
             ))
 

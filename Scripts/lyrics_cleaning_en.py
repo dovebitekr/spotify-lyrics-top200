@@ -59,43 +59,52 @@ def expand_slang_and_contractions(text):
     text = contractions.fix(text)
     return text
 
+def normalize_unicode(text: str) -> str:
+    """Normalize common Unicode whitespace, zero-width characters, and quotation marks."""
+    text = str(text).replace('\xa0', ' ').replace('\u200b', '').replace('\ufeff', '')
+    text = text.replace('’', "'").replace('‘', "'").replace('“', '"').replace('”', '"')
+    return text.replace('…', '...')
+
+
 def remove_genius_structure(series):
     output_series = (
         series
         .astype(str)
-        # square brackets and new lines
+        .apply(normalize_unicode)
+        # square brackets and section headers
         .str.replace(r"(?s)\[.*?\]", " ", regex=True)
-        # Genius structure and basic brackets
+        # Genius structure tags and basic brackets
         .str.replace(r"\(.*?(chorus|verse|outro|bridge).*?\)", " ", regex=True, flags=re.IGNORECASE)
         .str.replace(r"\d*\s*contributors?", " ", regex=True, flags=re.IGNORECASE)
         .str.replace(r"\bembed\b", " ", regex=True, flags=re.IGNORECASE)
         .str.replace(r"[ \t]+", " ", regex=True)
         .str.replace(r"\n\s*\n+", "\n\n", regex=True)
         .str.strip()
-        .str.strip()
     )
     return output_series
 
-def clean_english_lyrics(df, min_word_len):
+def clean_english_lyrics(df, min_word_len=2):
     df_out = df[df["language"] == "en"].copy()
+
+    # Backup raw metrics before updating
+    df_out["raw_word_count"] = df_out["word_count"]
+    df_out["raw_lexical_diversity"] = df_out.get("lexical_diversity", df_out.get("repetition_rate"))
 
     # 1. Raw data for transformer: Genius structure cleaning before lemmatization
     df_out["cleaned_lyrics_transformer"] = remove_genius_structure(df_out["lyrics"])
 
-    # 2. Expanded lyrics:
+    # 2. Expanded lyrics: slang & contractions expansion
     expanded_lyrics = df_out["cleaned_lyrics_transformer"].apply(expand_slang_and_contractions)
 
     # 3. Lemmatization from expanded_lyrics:
     docs = nlp.pipe(expanded_lyrics, batch_size=50)
 
-    # since spacy has its own functions for cleaning
     cleaned_lemmas = []
     for doc in docs:
         tokens = [
             token.lemma_.lower() for token in doc 
             if token.is_alpha
             and token.is_ascii
-            and token.lemma_.lower() not in STOPWORDS 
             and token.lemma_.lower() not in STOPWORDS 
             and len(token.lemma_) >= min_word_len
         ]
@@ -110,20 +119,26 @@ def clean_english_lyrics(df, min_word_len):
             .str.replace(r"\s+", " ", regex=True)
             .str.strip()
         )
-        
-    # print(df_out[["cleaned_lyrics_transformer", "expanded_lyrics", "lemmas"]].head())
+
+    # 4. Update word_count and lexical_diversity based on cleaned transformer lyrics
+    clean_words = df_out["cleaned_lyrics_transformer"].str.lower().str.split()
+    df_out["word_count"] = clean_words.apply(len)
+    df_out["lexical_diversity"] = clean_words.apply(
+        lambda w: round(len(set(w)) / len(w), 3) if len(w) > 0 else 0.0
+    )
+
+    # 5. Additional lemma-level vocabulary metrics
+    lemma_words = df_out["lemmas"].str.split()
+    df_out["lemma_word_count"] = lemma_words.apply(len)
+    df_out["lemma_lexical_diversity"] = lemma_words.apply(
+        lambda w: round(len(set(w)) / len(w), 3) if len(w) > 0 else 0.0
+    )
+
     return df_out
 
 if __name__ == "__main__":
-
-    # using a test dummy not to destroy first one
     df = pd.read_csv(INPUT_CSV)
-
-    # Cleaning english only lyrics into words
-    # min length of word is >= 2
-    df_out = clean_english_lyrics(df, min_word_len = 2)
-    # print(df_out.columns)
-
-    # write to csv
+    df_out = clean_english_lyrics(df, min_word_len=2)
     df_out.to_csv(OUTPUT_CSV, index=False)
+    print(f"Successfully processed {len(df_out)} English tracks and saved to: {OUTPUT_CSV.name}")
 
