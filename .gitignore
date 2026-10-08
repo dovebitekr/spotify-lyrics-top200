@@ -9,7 +9,7 @@ __pycache__/
 .DS_Store
 */.DS_Store
 .cache
-
+artifacts
 # Ignore raw weekly Spotify charts and intermediate data
 spotify_data/regional-global-weekly-*.csv
 spotify_data/final_dataset_for_ml_enriched.csv
