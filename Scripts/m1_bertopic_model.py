@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import argparse
 import json
-from collections import defaultdict, deque
+from collections import Counter, defaultdict, deque
 from pathlib import Path
 
 import numpy as np
@@ -30,16 +30,54 @@ from umap import UMAP
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA_PATH = ROOT / "spotify_data" / "final_dataset_for_ml_lyrics_en.csv"
-OUTPUT_PATH = ROOT / "artifacts" / "m1_bertopic_summary.json"
+SONG_LEVEL_OUTPUT_PATH = ROOT / "artifacts" / "m1_bertopic_summary_song_level.json"
+CONTEMPORARY_SONG_LEVEL_OUTPUT_PATH = ROOT / "artifacts" / "m1_bertopic_summary_2024plus_song_level.json"
 TOPIC_METRICS_PATH = ROOT / "artifacts" / "bertopic_topic_metrics.csv"
 TOPIC_ASSIGNMENTS_PATH = ROOT / "artifacts" / "bertopic_song_topics.csv"
+CONTEMPORARY_TOPIC_METRICS_PATH = ROOT / "artifacts" / "bertopic_topic_metrics_2024plus.csv"
+CONTEMPORARY_TOPIC_ASSIGNMENTS_PATH = ROOT / "artifacts" / "bertopic_song_topics_2024plus.csv"
 EMBEDDING_MODEL = "all-MiniLM-L6-v2"
-CHUNK_SIZE = 128
-CHUNK_STRIDE = 96
+CHUNK_OVERLAP_TOKENS = 32
+UMAP_CONFIG = {
+    "n_neighbors": 5,
+    "n_components": 5,
+    "min_dist": 0.0,
+    "metric": "cosine",
+    "random_state": 42,
+}
+HDBSCAN_CONFIG = {
+    "min_cluster_size": 8,
+    "min_samples": 1,
+    "metric": "euclidean",
+    "cluster_selection_method": "eom",
+}
+
+
+def _holiday_or_event_mask(df: pd.DataFrame) -> pd.Series:
+    seasonal_title_pattern = (
+        r"(?<![a-z0-9])(?:christmas|xmas|sleigh|reindeer|rudolph|mistletoe|"
+        r"jingle(?:\s+bells?)?|silent\s+night|winter\s+wonderland|one\s+more\s+sleep|"
+        r"last\s+christmas|fairytale\s+of\s+new\s+york|run\s+rudolph|"
+        r"santa\s+(?:baby|claus|clause|tell\s+me|is\s+coming\s+to\s+town))(?![a-z0-9])"
+    )
+    track_type = df["track_type"].fillna("").astype(str).str.strip().str.casefold()
+    holiday_type = track_type.isin({"holiday", "event_anthem"})
+    holiday_genre = df["genre"].fillna("").astype(str).str.contains(
+        r"(?<![a-z0-9])(?:holiday|christmas)(?![a-z0-9])",
+        case=False,
+        regex=True,
+    )
+    seasonal_title = df["track_name"].fillna("").astype(str).str.contains(
+        seasonal_title_pattern,
+        case=False,
+        regex=True,
+    )
+    return holiday_type | holiday_genre | seasonal_title
 
 
 def load_standard_corpus(csv_path: Path) -> pd.DataFrame:
     raw_df = pd.read_csv(csv_path)
+    raw_df["_exclude_from_standard_corpus"] = _holiday_or_event_mask(raw_df)
 
     agg_rules = {
         "best_rank_this_year": "min",
@@ -57,13 +95,16 @@ def load_standard_corpus(csv_path: Path) -> pd.DataFrame:
         "lexical_diversity": "first",
         "lemma_word_count": "first",
         "lemma_lexical_diversity": "first",
+        "_exclude_from_standard_corpus": "any",
     }
     for col in ["raw_word_count", "raw_lexical_diversity", "repetition_rate"]:
         if col in raw_df.columns:
             agg_rules[col] = "first"
 
     dedup_df = raw_df.groupby(["artist_names", "track_name"], as_index=False).agg(agg_rules)
-    standard_df = dedup_df[~dedup_df["track_type"].isin(["holiday", "event_anthem"])].copy()
+    standard_df = dedup_df.loc[~dedup_df["_exclude_from_standard_corpus"]].drop(
+        columns="_exclude_from_standard_corpus"
+    ).copy()
 
     standard_df["genre_cleaned"] = (
         standard_df["genre"].fillna("Unknown").replace({"Hip-Hop": "Hip-Hop/Rap", "Christmas: Classic": "Holiday"})
@@ -138,12 +179,102 @@ def prepare_m1_bertopic_features(df: pd.DataFrame, topic_probabilities: pd.DataF
     return combined.fillna(0.0)
 
 
+def chunk_documents(
+    documents: list[str],
+    tokenizer,
+    max_chunk_tokens: int,
+    overlap_tokens: int = CHUNK_OVERLAP_TOKENS,
+) -> tuple[list[str], list[int]]:
+    if max_chunk_tokens <= 0:
+        raise ValueError("max_chunk_tokens must be positive.")
+    if overlap_tokens < 0 or overlap_tokens >= max_chunk_tokens:
+        raise ValueError("overlap_tokens must be non-negative and smaller than max_chunk_tokens.")
+
+    chunks: list[str] = []
+    chunk_counts: list[int] = []
+    for document in documents:
+        token_ids = tokenizer(
+            document,
+            add_special_tokens=False,
+            truncation=False,
+        )["input_ids"]
+        first_chunk_index = len(chunks)
+        token_offset = 0
+
+        while token_offset < len(token_ids):
+            token_end = min(token_offset + max_chunk_tokens, len(token_ids))
+            while token_end > token_offset:
+                token_chunk = token_ids[token_offset:token_end]
+                chunk = tokenizer.decode(token_chunk, skip_special_tokens=True)
+                decoded_length = len(
+                    tokenizer(
+                        chunk,
+                        add_special_tokens=False,
+                        truncation=False,
+                    )["input_ids"]
+                )
+                if decoded_length <= max_chunk_tokens:
+                    break
+                token_end -= 1
+
+            if token_end <= token_offset:
+                raise ValueError("Could not create a lyric chunk within the model token limit.")
+
+            chunks.append(chunk)
+            if token_end == len(token_ids):
+                break
+            token_offset = max(token_offset + 1, token_end - overlap_tokens)
+
+        if not token_ids and len(chunks) == first_chunk_index:
+            chunks.append("")
+        chunk_counts.append(len(chunks) - first_chunk_index)
+
+    return chunks, chunk_counts
+
+
+def summarize_song_topic_assignments(topic_ids: list[int]) -> dict:
+    if not topic_ids:
+        raise ValueError("Cannot summarize empty BERTopic topic assignments.")
+
+    topic_song_counts = Counter(int(topic_id) for topic_id in topic_ids)
+    song_count = len(topic_ids)
+    non_outlier_counts = {
+        topic_id: count
+        for topic_id, count in topic_song_counts.items()
+        if topic_id != -1
+    }
+
+    return {
+        "n_topics": len(non_outlier_counts),
+        "song_count": song_count,
+        "topic_song_counts": {
+            str(topic_id): topic_song_counts[topic_id]
+            for topic_id in sorted(topic_song_counts)
+        },
+        "topic_song_shares": {
+            str(topic_id): topic_song_counts[topic_id] / song_count
+            for topic_id in sorted(topic_song_counts)
+        },
+        "outlier_song_count": topic_song_counts.get(-1, 0),
+        "outlier_song_share": topic_song_counts.get(-1, 0) / song_count,
+        "largest_non_outlier_topic_song_share": (
+            max(non_outlier_counts.values(), default=0) / song_count
+        ),
+    }
+
+
 def evaluate_model(df: pd.DataFrame, model_name: str, include_topics: bool = False) -> dict:
     y = df["target_hit"].to_numpy()
     groups = df["artist_cluster"].to_numpy()
     groupsplit = StratifiedGroupKFold(n_splits=5, shuffle=True, random_state=42)
 
     fold_metrics: list[dict] = []
+    embedding_encoder = SentenceTransformer(EMBEDDING_MODEL) if include_topics else None
+    if embedding_encoder is not None:
+        max_chunk_tokens = embedding_encoder.max_seq_length - (
+            embedding_encoder.tokenizer.num_special_tokens_to_add(pair=False)
+        )
+
     for fold_number, (train_idx, test_idx) in enumerate(groupsplit.split(df, y, groups), start=1):
         train_df = df.iloc[train_idx].copy().reset_index(drop=True)
         test_df = df.iloc[test_idx].copy().reset_index(drop=True)
@@ -152,18 +283,52 @@ def evaluate_model(df: pd.DataFrame, model_name: str, include_topics: bool = Fal
         test_text = test_df["cleaned_lyrics_transformer"].fillna("").astype(str).tolist()
 
         if include_topics:
-            topic_model = BERTopic(
-                embedding_model="all-MiniLM-L6-v2",
-                language="english",
+            if embedding_encoder is None:
+                raise RuntimeError("Topic embedding model was not initialized.")
+            train_lemmas = train_df["lemmas"].fillna("").astype(str).tolist()
+            train_embeddings = embed_long_documents(train_text, embedding_encoder)
+            test_embeddings = embed_long_documents(test_text, embedding_encoder)
+            topic_model = build_topic_model(
+                embedding_model=embedding_encoder,
+                vectorizer_model=build_topic_vectorizer(train_lemmas),
                 calculate_probabilities=True,
-                min_topic_size=12,
-                n_gram_range=(1, 2),
-                verbose=False,
+                prediction_data=True,
             )
-            _, train_topic_probs = topic_model.fit_transform(train_text)
-            _, test_topic_probs = topic_model.transform(test_text)
-            train_features = prepare_m1_bertopic_features(train_df, pd.DataFrame(train_topic_probs))
-            test_features = prepare_m1_bertopic_features(test_df, pd.DataFrame(test_topic_probs))
+            train_song_topics, train_topic_probs = topic_model.fit_transform(
+                train_text,
+                train_embeddings,
+            )
+            topic_model.update_topics(
+                train_lemmas,
+                topics=train_song_topics,
+                vectorizer_model=build_topic_vectorizer(train_lemmas),
+            )
+            test_song_topics, test_topic_probs = topic_model.transform(
+                test_text,
+                test_embeddings,
+            )
+            if train_topic_probs is None or test_topic_probs is None:
+                raise ValueError("BERTopic did not return topic probabilities for the songs.")
+            topic_diagnostics = {
+                "train": summarize_song_topic_assignments(train_song_topics),
+                "test": summarize_song_topic_assignments(test_song_topics),
+                "topic_terms": {
+                    str(topic_id): [
+                        term
+                        for term, _ in topic_model.get_topic(topic_id)[:10]
+                    ]
+                    for topic_id in sorted(set(train_song_topics))
+                    if topic_id != -1
+                },
+            }
+            train_features = prepare_m1_bertopic_features(
+                train_df,
+                pd.DataFrame(train_topic_probs),
+            )
+            test_features = prepare_m1_bertopic_features(
+                test_df,
+                pd.DataFrame(test_topic_probs),
+            )
             feature_cols = sorted(set(train_features.columns) | set(test_features.columns))
             train_features = train_features.reindex(columns=feature_cols, fill_value=0.0)
             test_features = test_features.reindex(columns=feature_cols, fill_value=0.0)
@@ -184,6 +349,7 @@ def evaluate_model(df: pd.DataFrame, model_name: str, include_topics: bool = Fal
                 "fold": fold_number,
                 "roc_auc": roc_auc_score(test_df["target_hit"], probas),
                 "macro_f1": f1_score(test_df["target_hit"], predictions, average="macro"),
+                **({"topic_diagnostics": topic_diagnostics} if include_topics else {}),
             }
         )
 
@@ -195,40 +361,48 @@ def evaluate_model(df: pd.DataFrame, model_name: str, include_topics: bool = Fal
         "mean_roc_auc": float(pd.Series([m["roc_auc"] for m in fold_metrics]).mean()),
         "mean_macro_f1": float(pd.Series([m["macro_f1"] for m in fold_metrics]).mean()),
     }
+    if include_topics:
+        summary["topic_modeling"] = {
+            "embedding_model": EMBEDDING_MODEL,
+            "max_tokens_per_chunk": max_chunk_tokens,
+            "overlap_tokens": CHUNK_OVERLAP_TOKENS,
+            "clustering_unit": "song",
+            "song_embedding": "mean of normalized overlapping chunk embeddings, then L2-normalized",
+            "umap": UMAP_CONFIG,
+            "hdbscan": {**HDBSCAN_CONFIG, "prediction_data": True},
+        }
     return summary
 
 
-def embed_long_documents(documents: list[str]) -> np.ndarray:
+def embed_long_documents(
+    documents: list[str],
+    encoder: SentenceTransformer | None = None,
+    show_progress_bar: bool = False,
+) -> np.ndarray:
     """Embed overlapping lyric chunks and mean-pool them to one vector per song."""
-    encoder = SentenceTransformer(EMBEDDING_MODEL)
-    document_chunks: list[list[str]] = []
-    tokenizer = encoder.tokenizer
-
-    for document in documents:
-        token_ids = tokenizer(document, add_special_tokens=False, truncation=False)["input_ids"]
-        chunks = []
-        for start in range(0, len(token_ids), CHUNK_STRIDE):
-            chunks.append(
-                tokenizer.decode(token_ids[start : start + CHUNK_SIZE], skip_special_tokens=True)
-            )
-            if start + CHUNK_SIZE >= len(token_ids):
-                break
-        document_chunks.append(chunks or [""])
-
-    flat_chunks = [chunk for chunks in document_chunks for chunk in chunks]
+    if encoder is None:
+        encoder = SentenceTransformer(EMBEDDING_MODEL)
+    max_chunk_tokens = encoder.max_seq_length - (
+        encoder.tokenizer.num_special_tokens_to_add(pair=False)
+    )
+    flat_chunks, chunk_counts = chunk_documents(
+        documents,
+        encoder.tokenizer,
+        max_chunk_tokens,
+    )
     chunk_embeddings = encoder.encode(
         flat_chunks,
-        show_progress_bar=True,
+        show_progress_bar=show_progress_bar,
         normalize_embeddings=True,
     )
 
     document_embeddings = []
     offset = 0
-    for chunks in document_chunks:
-        pooled = chunk_embeddings[offset : offset + len(chunks)].mean(axis=0)
+    for chunk_count in chunk_counts:
+        pooled = chunk_embeddings[offset : offset + chunk_count].mean(axis=0)
         pooled /= np.linalg.norm(pooled)
         document_embeddings.append(pooled)
-        offset += len(chunks)
+        offset += chunk_count
 
     return np.asarray(document_embeddings)
 
@@ -256,30 +430,40 @@ def build_topic_vectorizer(documents: list[str]) -> CountVectorizer:
     )
 
 
-def create_descriptive_topic_report(df: pd.DataFrame) -> pd.DataFrame:
+def build_topic_model(
+    embedding_model: SentenceTransformer | None,
+    vectorizer_model: CountVectorizer,
+    calculate_probabilities: bool,
+    prediction_data: bool = False,
+) -> BERTopic:
+    return BERTopic(
+        embedding_model=embedding_model,
+        language="english",
+        calculate_probabilities=calculate_probabilities,
+        umap_model=UMAP(**UMAP_CONFIG),
+        hdbscan_model=HDBSCAN(
+            **HDBSCAN_CONFIG,
+            prediction_data=prediction_data,
+        ),
+        vectorizer_model=vectorizer_model,
+        verbose=False,
+    )
+
+
+def create_descriptive_topic_report(
+    df: pd.DataFrame,
+    topic_metrics_path: Path = TOPIC_METRICS_PATH,
+    topic_assignments_path: Path = TOPIC_ASSIGNMENTS_PATH,
+    cohort_label: str = "all eligible release years",
+) -> pd.DataFrame:
     """Fit topics from lyric embeddings and describe them with cleaned lemmas."""
     documents = df["cleaned_lyrics_transformer"].fillna("").astype(str).tolist()
     representation_documents = df["lemmas"].fillna("").astype(str).tolist()
-    embeddings = embed_long_documents(documents)
-    topic_model = BERTopic(
+    embeddings = embed_long_documents(documents, show_progress_bar=True)
+    topic_model = build_topic_model(
         embedding_model=None,
-        language="english",
-        calculate_probabilities=False,
-        umap_model=UMAP(
-            n_neighbors=5,
-            n_components=5,
-            min_dist=0.0,
-            metric="cosine",
-            random_state=42,
-        ),
-        hdbscan_model=HDBSCAN(
-            min_cluster_size=8,
-            min_samples=1,
-            metric="euclidean",
-            cluster_selection_method="eom",
-        ),
         vectorizer_model=build_topic_vectorizer(representation_documents),
-        verbose=False,
+        calculate_probabilities=False,
     )
     topics, _ = topic_model.fit_transform(documents, embeddings)
     topic_model.update_topics(
@@ -289,8 +473,9 @@ def create_descriptive_topic_report(df: pd.DataFrame) -> pd.DataFrame:
     )
 
     assignments = df[
-        ["artist_names", "track_name", "best_rank_this_year", "target_hit"]
+        ["artist_names", "track_name", "release_year", "best_rank_this_year", "target_hit"]
     ].reset_index(drop=True)
+    assignments["cohort"] = cohort_label
     assignments["topic_id"] = topics
     topic_info = topic_model.get_topic_info().set_index("Topic")
 
@@ -324,10 +509,12 @@ def create_descriptive_topic_report(df: pd.DataFrame) -> pd.DataFrame:
     ]
     grouped["share_of_songs_pct"] = grouped["song_count"] / len(assignments) * 100
     grouped["is_outlier"] = grouped["topic_id"].eq(-1)
+    grouped["cohort"] = cohort_label
     grouped = grouped[
         [
             "topic_id",
             "topic_label",
+            "cohort",
             "keywords",
             "representative_tracks",
             "song_count",
@@ -347,9 +534,9 @@ def create_descriptive_topic_report(df: pd.DataFrame) -> pd.DataFrame:
         None,
     ]
 
-    TOPIC_METRICS_PATH.parent.mkdir(parents=True, exist_ok=True)
-    grouped.to_csv(TOPIC_METRICS_PATH, index=False)
-    assignments.to_csv(TOPIC_ASSIGNMENTS_PATH, index=False)
+    topic_metrics_path.parent.mkdir(parents=True, exist_ok=True)
+    grouped.to_csv(topic_metrics_path, index=False)
+    assignments.to_csv(topic_assignments_path, index=False)
     return grouped
 
 
@@ -358,33 +545,81 @@ def main() -> None:
     parser.add_argument(
         "--topics-only",
         action="store_true",
-        help="Generate the full-corpus BERTopic prevalence/rank report without running classifier CV.",
+        help="Generate the BERTopic prevalence/rank report without running classifier CV.",
+    )
+    parser.add_argument(
+        "--classifier-only",
+        action="store_true",
+        help="Run classifier cross-validation without regenerating the descriptive topic report.",
+    )
+    parser.add_argument(
+        "--exclude-catalog",
+        action="store_true",
+        help="Restrict the modeling cohort to release_year >= 2024.",
     )
     args = parser.parse_args()
+    if args.topics_only and args.classifier_only:
+        parser.error("--topics-only and --classifier-only cannot be used together.")
 
     df = load_standard_corpus(DATA_PATH)
-    topic_metrics = create_descriptive_topic_report(df)
+    if args.exclude_catalog:
+        release_year = pd.to_numeric(df["release_year"], errors="coerce")
+        df = df.loc[release_year >= 2024].copy()
+        cohort_label = "release_year >= 2024"
+        metrics_path = CONTEMPORARY_TOPIC_METRICS_PATH
+        assignments_path = CONTEMPORARY_TOPIC_ASSIGNMENTS_PATH
+    else:
+        cohort_label = "all eligible release years"
+        metrics_path = TOPIC_METRICS_PATH
+        assignments_path = TOPIC_ASSIGNMENTS_PATH
+
+    print(f"Selected cohort: {cohort_label} ({len(df)} songs; holidays/events excluded)")
+    if not args.classifier_only:
+        topic_metrics = create_descriptive_topic_report(
+            df,
+            topic_metrics_path=metrics_path,
+            topic_assignments_path=assignments_path,
+            cohort_label=cohort_label,
+        )
 
     if args.topics_only:
-        print(f"Descriptive BERTopic report written to {TOPIC_METRICS_PATH}")
+        print(f"Descriptive BERTopic report written to {metrics_path}")
         print(topic_metrics.to_string(index=False))
         return
 
     m1_summary = evaluate_model(df, "M1", include_topics=False)
-    m1_bertopic_summary = evaluate_model(df, "M1 + BERTopic", include_topics=True)
+    m1_bertopic_summary = evaluate_model(
+        df,
+        "M1 + BERTopic (song-level pooled)",
+        include_topics=True,
+    )
 
     summary = {
         "dataset": {
             "rows": int(len(df)),
             "target_rate": float(df["target_hit"].mean()),
             "artist_clusters": int(df["artist_cluster"].nunique()),
+            "cohort": cohort_label,
+            "holiday_and_event_tracks_excluded": True,
+        },
+        "text_processing": {
+            "embedding_model": EMBEDDING_MODEL,
+            "chunk_token_limit": "embedding_model_max_seq_length_minus_special_tokens",
+            "overlap_tokens": CHUNK_OVERLAP_TOKENS,
+            "song_level_embedding": "mean of normalized overlapping chunk embeddings, then L2-normalized",
+            "classifier_fits_topic_model_on_training_songs_only": True,
         },
         "M1": m1_summary,
         "M1_plus_BERTopic": m1_bertopic_summary,
     }
 
-    OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
-    OUTPUT_PATH.write_text(json.dumps(summary, indent=2), encoding="utf-8")
+    output_path = (
+        CONTEMPORARY_SONG_LEVEL_OUTPUT_PATH
+        if args.exclude_catalog
+        else SONG_LEVEL_OUTPUT_PATH
+    )
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(json.dumps(summary, indent=2), encoding="utf-8")
 
     print(
         json.dumps(
