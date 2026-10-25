@@ -4,8 +4,6 @@ import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 from pathlib import Path
-import nltk
-from nltk.sentiment.vader import SentimentIntensityAnalyzer
 
 # Page Configuration
 st.set_page_config(
@@ -57,16 +55,6 @@ def _calc_line_repetition(text: str) -> float:
         return 0.0
     return 1.0 - (len(set(lines)) / len(lines))
 
-def _calc_line_sentiment(text: str, sia: SentimentIntensityAnalyzer) -> float:
-    """Compute average VADER compound sentiment across non-empty lyric lines.
-    Averaging line by line avoids the length-saturation problem where 350-word lyrics
-    push document-level VADER scores to +0.99 or -0.99.
-    """
-    lines = [line.strip() for line in str(text).splitlines() if line.strip()]
-    if not lines:
-        return 0.0
-    return float(np.mean([sia.polarity_scores(line)["compound"] for line in lines]))
-
 @st.cache_data
 def load_standard_cohort():
     if not DATA_PATH.exists():
@@ -107,18 +95,8 @@ def load_standard_cohort():
     df_dedup = raw_df.groupby(["artist_names", "track_name"], as_index=False).agg(agg_rules)
     df_clean = df_dedup[~df_dedup["_exclude"]].copy().reset_index(drop=True)
     
-    # 1. Line-level repetition rate
+    # Compute line-level repetition rate
     df_clean["line_repetition_rate"] = df_clean["cleaned_lyrics_transformer"].apply(_calc_line_repetition)
-    
-    # 2. Line-by-line average VADER sentiment
-    try:
-        sia = SentimentIntensityAnalyzer()
-    except Exception:
-        nltk.download("vader_lexicon", quiet=True)
-        sia = SentimentIntensityAnalyzer()
-    df_clean["line_sentiment"] = df_clean["cleaned_lyrics_transformer"].fillna("").apply(
-        lambda t: _calc_line_sentiment(str(t), sia)
-    )
     
     df_clean["target_hit"] = (df_clean["best_rank_this_year"] <= 50).astype(int)
     df_clean["Hit_Tier"] = df_clean["target_hit"].map({1: "Top 50 Hits", 0: "Ranks 51–200"})
@@ -149,15 +127,15 @@ Emerging artists, songwriters, and data science students who want to see what re
 <p><b>Dataset Used:</b><br>
 One year of weekly <b>Spotify Global Top 200</b> chart data (Sept 2025 – Sept 2026). After filtering for English songs and removing duplicate album versions and seasonal Christmas tracks, our final modeling dataset contains <b>582 unique songs</b> (228 Top 50 hits and 354 songs peaking in ranks 51–200).</p>
 <p><b>Methods Used:</b><br>
-We analyzed the lyrics in three steps: (1) <b>Exploratory Data Analysis (EDA)</b> on word count, line repetition, vocabulary diversity, and VADER sentiment; (2) <b>Topic Modeling (BERTopic)</b> to group songs by lyrical theme; and (3) <b>Logistic Regression with 5-Fold Grouped Cross-Validation</b> to test whether lyrics help predict Top 50 placement.</p>
+We analyzed the lyrics in three steps: (1) <b>Exploratory Data Analysis (EDA)</b> on word count, line repetition, and vocabulary diversity; (2) <b>Topic Modeling (BERTopic)</b> to group songs by lyrical theme; and (3) <b>Logistic Regression with 5-Fold Grouped Cross-Validation</b> to test whether lyrics help predict Top 50 placement.</p>
 </div>
 </div>
 <div style="background-color: #1E293B; padding: 22px 24px; border-radius: 8px; margin-top: 20px; border-left: 4px solid #10B981; font-size: 0.95rem; line-height: 1.7;">
 <h4 style="margin-top: 0; color: #10B981; font-size: 1.1rem;">Key Takeaways: Three Simple Findings</h4>
 <p><b>1. Basic Lyric Features Look the Same in Top 50 Hits and Ranks 51–200:</b><br>
-Whether a song peaks in the Top 50 or stays between ranks 51 and 200, its lyric length, chorus repetition rate, vocabulary diversity, and average line sentiment are almost identical. Statistical tests (Mann-Whitney U test) show no meaningful difference on any of these features.</p>
+Whether a song peaks in the Top 50 or stays between ranks 51 and 200, its lyric length, chorus repetition rate, and vocabulary diversity are almost identical. Statistical tests (Mann-Whitney U test) show no meaningful difference on any of these features.</p>
 <p><b>2. Adding Lyric Topics or Text Embeddings Does Not Improve Machine Learning Predictions:</b><br>
-A simple baseline Logistic Regression model using only <b>Release Year and Genre</b> achieves a moderate cross-validated ROC-AUC of <b>0.66</b>. Adding BERTopic lyric themes does not improve the score, and models trained only on lyrics perform around <b>0.45–0.51</b> (the same as a 50/50 coin flip).</p>
+A simple baseline Logistic Regression model using only <b>Release Year and Genre</b> achieves a moderate cross-validated ROC-AUC of <b>0.66</b>. Adding BERTopic lyric themes does not improve the score, and models trained only on lyrics perform around <b>0.47–0.51</b> (the same as a 50/50 coin flip).</p>
 <p style="margin-bottom: 0;"><b>3. Apparent "Winning Themes" Are Driven by Superstars and Release Timing:</b><br>
 Some genres and lyric topics appear to have high Top 50 rates at first glance. However, looking closer at the data shows why: brand-new songs naturally peak higher during the current chart year than older catalog songs, and a few mega-stars (like Taylor Swift, Drake, Olivia Rodrigo, and Ariana Grande) release many songs at once that all land in the Top 50.</p>
 </div>
@@ -178,9 +156,9 @@ tabs = st.tabs([
 with tabs[0]:
     st.header("Part 1: Do Top 50 Hits Have Different Lyric Statistics?")
     st.markdown(r"""
-    **Question**: Do Top 50 songs (`n = 228`) have more repetition, shorter lyrics, simpler vocabulary, or different sentiment than songs peaking at ranks 51–200 (`n = 354`)?  
+    **Question**: Do Top 50 songs (`n = 228`) have more repetition, shorter lyrics, or simpler vocabulary than songs peaking at ranks 51–200 (`n = 354`)?  
     **Method**: Because song statistics have skewed distributions (for example, rap songs have much higher word counts than pop songs), we compare medians and means and run the non-parametric **Mann-Whitney U test**.  
-    **Result**: **All four lyric features have $p > 0.20$**, meaning there is no statistically significant difference between Top 50 hits and lower-charting tracks.
+    **Result**: **All three lyric features have $p > 0.20$**, meaning there is no statistically significant difference between Top 50 hits and lower-charting tracks.
     """)
     
     st.subheader("Interactive Feature Distribution Explorer")
@@ -189,8 +167,7 @@ with tabs[0]:
         [
             "Chorus Line Repetition Rate",
             "Word Count (Song Length)",
-            "Vocabulary Diversity (Type-Token Ratio)",
-            "Average Line Sentiment (VADER)"
+            "Vocabulary Diversity (Type-Token Ratio)"
         ],
         horizontal=True
     )
@@ -249,7 +226,7 @@ with tabs[0]:
             st.plotly_chart(fig, use_container_width=True)
         st.caption("Takeaway: Both groups have a median length of about 350 words ($p = 0.5294$).")
 
-    elif attr_option == "Vocabulary Diversity (Type-Token Ratio)":
+    else:
         col1.metric("Top 50 Hits (Median / Mean)", "0.372 / 0.374", help="Unique words divided by total words (Type-Token Ratio) in Top 50 tracks (n = 228).")
         col2.metric("Ranks 51–200 (Median / Mean)", "0.365 / 0.367", help="Unique words divided by total words in ranks 51–200 tracks (n = 354).")
         col3.metric(
@@ -275,67 +252,35 @@ with tabs[0]:
             st.plotly_chart(fig, use_container_width=True)
         st.caption("Takeaway: Top 50 hits and lower-ranking songs use roughly the same proportion of unique words ($p = 0.3255$).")
 
-    else:
-        col1.metric("Top 50 Hits (Median / Mean)", "+0.049 / +0.050", help="Average VADER sentiment score per lyric line (-1 to +1) for Top 50 tracks (n = 228).")
-        col2.metric("Ranks 51–200 (Median / Mean)", "+0.047 / +0.051", help="Average VADER sentiment score per lyric line (-1 to +1) for ranks 51–200 tracks (n = 354).")
-        col3.metric(
-            "Mann-Whitney U Test",
-            "p = 0.9282",
-            delta="No Significant Difference",
-            delta_color="off",
-            help="We compute VADER sentiment line by line and average across the song so long lyrics do not saturate at +0.99. Both groups have virtually identical sentiment (p = 0.9282)."
-        )
-        
-        if clean_df is not None:
-            fig = px.box(
-                clean_df,
-                x="Hit_Tier",
-                y="line_sentiment",
-                color="Hit_Tier",
-                color_discrete_map={"Top 50 Hits": "#10B981", "Ranks 51–200": "#64748B"},
-                points="outliers",
-                labels={"line_sentiment": "Average Line Sentiment (-1 to +1)", "Hit_Tier": "Chart Group"},
-                title="Average Line Sentiment (VADER): Top 50 vs. Ranks 51–200 (N = 582)"
-            )
-            fig.update_layout(showlegend=False, height=380)
-            st.plotly_chart(fig, use_container_width=True)
-        st.caption("Takeaway: Average line-by-line sentiment is slightly positive (+0.05) and nearly identical in both groups ($p = 0.9282$).")
-
     st.markdown("---")
     st.subheader("Summary Table of Basic Lyric Features (N = 582)")
     eda_summary_df = pd.DataFrame({
         "Lyric Feature": [
             "Chorus Line Repetition Rate (1 - unique_lines / total_lines)",
             "Word Count (Total Cleaned Words)",
-            "Vocabulary Diversity (Unique Words / Total Words)",
-            "Average Line Sentiment (VADER Compound per Line)"
+            "Vocabulary Diversity (Unique Words / Total Words)"
         ],
         "Top 50 Hits (n = 228)": [
             "Median: 31.8% (Mean: 32.2%)",
             "Median: 352.5 (Mean: 376.7)",
-            "Median: 0.372 (Mean: 0.374)",
-            "Median: +0.049 (Mean: +0.050)"
+            "Median: 0.372 (Mean: 0.374)"
         ],
         "Ranks 51–200 (n = 354)": [
             "Median: 33.3% (Mean: 33.9%)",
             "Median: 346.5 (Mean: 374.0)",
-            "Median: 0.365 (Mean: 0.367)",
-            "Median: +0.047 (Mean: +0.051)"
+            "Median: 0.365 (Mean: 0.367)"
         ],
         "Mann-Whitney U p-value": [
             "p = 0.2154",
             "p = 0.5294",
-            "p = 0.3255",
-            "p = 0.9282"
+            "p = 0.3255"
         ],
         "Spearman Correlation with Peak Rank": [
             "r = +0.044 (p = 0.2842)",
             "r = -0.030 (p = 0.4735)",
-            "r = -0.023 (p = 0.5807)",
-            "r = +0.014 (p = 0.7435)"
+            "r = -0.023 (p = 0.5807)"
         ],
         "Conclusion": [
-            "Not Significant",
             "Not Significant",
             "Not Significant",
             "Not Significant"
@@ -371,11 +316,11 @@ with tabs[1]:
                 "M1: Metadata Baseline (Release Year + Genre)",
                 "M2: Metadata + BERTopic Lyric Themes",
                 "M3: Text Embeddings Only (Sentence-BERT)",
-                "M4: Basic Lyric Stats Only (WC, Rep, TTR, VADER)"
+                "M4: Basic Lyric Stats Only (WC, Repetition, TTR)"
             ],
-            "Mean ROC-AUC": [0.6611, 0.6463, 0.5080, 0.4489],
-            "Fold Std Dev": ["± 0.1000", "± 0.0566", "± 0.0450", "± 0.0557"],
-            "Macro F1": ["0.5845", "0.5861", "0.5090", "0.4496"]
+            "Mean ROC-AUC": [0.6611, 0.6463, 0.5080, 0.4696],
+            "Fold Std Dev": ["± 0.1000", "± 0.0566", "± 0.0450", "± 0.0394"],
+            "Macro F1": ["0.5845", "0.5861", "0.5090", "0.4686"]
         })
         fig_full = px.bar(
             cohort_full,
@@ -392,7 +337,7 @@ with tabs[1]:
         st.markdown(r"""
         * **Metadata Baseline (`ROC-AUC = 0.6611`)**: Using just `Release Year` and `Genre` gives moderate predictive performance.
         * **Adding Lyrics Does Not Help (`ROC-AUC = 0.6463`)**: Adding BERTopic lyric probabilities slightly lowers the average score from `0.6611` to `0.6463`.
-        * **Lyrics Alone Perform Like a Coin Toss (`0.45–0.51`)**: Both Sentence-BERT text embeddings (`0.5080`) and basic lyric stats (`0.4489`) perform around `0.50`.
+        * **Lyrics Alone Perform Like a Coin Toss (`0.47–0.51`)**: Both Sentence-BERT text embeddings (`0.5080`) and basic lyric stats (`0.4696`) perform around `0.50`.
         """)
 
     with colB:
@@ -402,11 +347,11 @@ with tabs[1]:
                 "M2: Metadata + BERTopic Lyric Themes",
                 "M1: Metadata Baseline (Release Year + Genre)",
                 "M3: Text Embeddings Only (Sentence-BERT)",
-                "M4: Basic Lyric Stats Only (WC, Rep, TTR, VADER)"
+                "M4: Basic Lyric Stats Only (WC, Repetition, TTR)"
             ],
-            "Mean ROC-AUC": [0.5313, 0.5239, 0.4878, 0.3411],
-            "Fold Std Dev": ["± 0.1190", "± 0.1087", "± 0.1186", "± 0.0561"],
-            "Macro F1": ["0.5234", "0.5440", "0.4820", "0.3634"]
+            "Mean ROC-AUC": [0.5313, 0.5239, 0.4878, 0.3525],
+            "Fold Std Dev": ["± 0.1190", "± 0.1087", "± 0.1186", "± 0.0372"],
+            "Macro F1": ["0.5234", "0.5440", "0.4820", "0.3957"]
         })
         fig_2024 = px.bar(
             cohort_2024,
@@ -437,7 +382,7 @@ with tabs[1]:
             "Artist Chart Presence (10+ Charting Songs vs. 1–2 Songs)",
             "Music Genre (Consolidated into 8 Major Genres)",
             "Lyric Themes (24 BERTopic Clusters)",
-            "Basic Lyric Features (Word Count, Repetition, Vocabulary, Sentiment)"
+            "Basic Lyric Features (Word Count, Repetition, Vocabulary Diversity)"
         ],
         "Statistical Test (N = 582)": [
             "Mann-Whitney U test: p < 0.0001",
