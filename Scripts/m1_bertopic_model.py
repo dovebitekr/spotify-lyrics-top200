@@ -26,6 +26,7 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import f1_score, roc_auc_score
 from sklearn.model_selection import StratifiedGroupKFold
+from sklearn.preprocessing import StandardScaler
 from umap import UMAP
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -338,6 +339,11 @@ def evaluate_model(df: pd.DataFrame, model_name: str, include_topics: bool = Fal
             feature_cols = sorted(set(train_features.columns) | set(test_features.columns))
             train_features = train_features.reindex(columns=feature_cols, fill_value=0.0)
             test_features = test_features.reindex(columns=feature_cols, fill_value=0.0)
+
+        if "release_year" in train_features.columns:
+            scaler = StandardScaler()
+            train_features["release_year"] = scaler.fit_transform(train_features[["release_year"]])
+            test_features["release_year"] = scaler.transform(test_features[["release_year"]])
 
         model = LogisticRegression(max_iter=2000, class_weight="balanced")
         model.fit(train_features, train_df["target_hit"])
