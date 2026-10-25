@@ -19,25 +19,25 @@ DATA_PATH = PROJECT_ROOT / "spotify_data" / "final_dataset_for_ml_lyrics_en.csv"
 TOPICS_FULL_PATH = PROJECT_ROOT / "artifacts" / "bertopic_topic_metrics.csv"
 SONG_TOPICS_PATH = PROJECT_ROOT / "artifacts" / "bertopic_song_topics.csv"
 
-# Descriptive Names for the 24 BERTopic Clusters
+# Descriptive Names for the 24 BERTopic Clusters (Matched to bertopic_topic_metrics.csv)
 TOPIC_DISPLAY_ALIASES = {
     -1: "Unclustered / Outliers (Topic -1)",
-    0: "Street Rap & Trap Anthems",
-    1: "Club Grooves & Flirtation",
+    0: "Club Grooves & Flirtation",
+    1: "Street Rap & Trap Anthems",
     2: "Urban Pop, Style & Late-Night Confidence",
-    3: "Heartbreak, Letting Go & Breakup Ballads",
+    3: "High-Energy K-Pop & Performance Hooks",
     4: "Dark Alt-Pop, Angst & Obsession",
-    5: "High-Energy K-Pop & Performance Hooks",
-    6: "Classic Pop Storytelling & Youthful Nostalgia",
-    7: "Melancholic Reflection, Rain & Solitude",
+    5: "Rhythmic Dance-Pop & Party Anthems",
+    6: "Heartbreak, Letting Go & Breakup Ballads",
+    7: "Classic Pop Storytelling & Nostalgia",
     8: "Confessional Pop & Emotional Vulnerability",
-    9: "Existential Questions, Faith & Soul Searching",
-    10: "Rhythmic Dance-Pop & Vocal Chants",
+    9: "Melancholic Reflection, Summer & Solitude",
+    10: "Post-Breakup Distance & Holding On",
     11: "Contemporary R&B, Swag & Collabs",
     12: "Funk, Classic Rhythm & Nostalgic Chants",
     13: "Melodic Romance & Stadium Hooks",
     14: "Folk-Pop Introspection & Acoustic Roots",
-    15: "Indie Folk Melancholy & Healing",
+    15: "Indie Folk Melancholy & Soulful R&B",
     16: "Atmospheric Midnight Romance",
     17: "Dream Pop & Slow-Burn Longing",
     18: "Emotional Diving, Pain & Release",
