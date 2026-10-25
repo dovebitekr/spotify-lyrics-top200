@@ -2,7 +2,7 @@ import sqlite3
 import pandas as pd
 from pathlib import Path
 
-PROJECT_ROOT = Path(__file__).resolve().parent
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DB_PATH = PROJECT_ROOT / "lyrics.db"
 CSV_PATH = PROJECT_ROOT / "spotify_data" / "final_dataset_for_ml_enriched.csv"
 

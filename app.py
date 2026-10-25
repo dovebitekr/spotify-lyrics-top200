@@ -140,7 +140,7 @@ st.title("The Lyric Illusion: Deconstructing Chart Position in the Spotify Top 2
 st.caption("An Empirical Data Science Audit on Commercial Music, Confounding Bias, and Feature Value")
 
 with st.container():
-    st.markdown("""<div style="background-color: #0F172A; padding: 26px; border-radius: 12px; border: 1px solid #334155; margin-bottom: 25px;">
+    st.markdown(r"""<div style="background-color: #0F172A; padding: 26px; border-radius: 12px; border: 1px solid #334155; margin-bottom: 25px;">
 <h3 style="color: #38BDF8; margin-top: 0; font-size: 1.3rem;">Project Overview &amp; Executive Briefing</h3>
 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; font-size: 0.95rem; line-height: 1.65;">
 <div>
@@ -183,7 +183,7 @@ tabs = st.tabs([
 # ==============================================================================
 with tabs[0]:
     st.header("Act 1: The Lyric Surface Myth")
-    st.markdown("""
+    st.markdown(r"""
     **Core Question**: Do songs reaching the Top 50 feature higher chorus line repetition, shorter verses, simpler vocabulary, or more extreme emotional polarity than songs peaking in ranks 51–200?  
     **Empirical Result**: Evaluated across 582 charting tracks using non-parametric Mann-Whitney U tests, **none of the four surface linguistic or sentiment metrics show statistically significant separation ($p > 0.20$).**
     """)
@@ -312,7 +312,7 @@ with tabs[0]:
     
     # Three-Way Robustness Verification
     st.subheader("Robustness Verification Across Sub-Cohorts & Alternative Target Definitions")
-    st.markdown("""
+    st.markdown(r"""
     To ensure our null surface lyric findings are not artifacts of (a) superstar discography dominance, (b) observation-window left-truncation of older catalog releases, or (c) the window-specific target definition, we re-evaluated all four metrics across three sensitivity specifications:
     """)
     
@@ -365,12 +365,12 @@ with tabs[0]:
 # ==============================================================================
 with tabs[1]:
     st.header("Act 2: Market Realities & Model Ablation")
-    st.markdown("""
+    st.markdown(r"""
     To test whether dense Transformer representations or thematic clusters add predictive value beyond basic track metadata, we conducted a controlled ablation study under **5-Fold Stratified Group K-Fold Cross-Validation** across 191 artist collaboration clusters.
     """)
     
     st.subheader("Methodological Design & Leak Prevention")
-    st.markdown("""
+    st.markdown(r"""
     * **Artist-Cluster Grouped Cross-Validation (191 Connected Components):**  
       Collaborating artists are decomposed into a graph of 191 connected components. Grouping by artist cluster prevents the same artist or collaborating circle from appearing in both training and test splits within any fold, stopping the classifier from memorizing artist idiolects. *(Scope note: Group CV prevents same-artist leakage, though it cannot prevent cross-artist stylistic similarity or shared external songwriting teams.)*
     * **Fold-Internal BERTopic Fitting vs. Direct 384-Dim Embeddings:**  
@@ -409,7 +409,7 @@ with tabs[1]:
         fig_full.add_vline(x=0.50, line_dash="dash", line_color="#EF4444")
         fig_full.update_layout(yaxis={'categoryorder': 'total ascending'}, height=380, xaxis_range=[0.30, 0.78])
         st.plotly_chart(fig_full, use_container_width=True)
-        st.markdown("""
+        st.markdown(r"""
         * **Release Year Alone (`0.6676 ± 0.0786`) Exceeds M1 (`0.6600 ± 0.1008`)**: Holding sample size fixed at $N=582$, a single feature (`release_year`) accounts for 100% of M1's discrimination.
         * **Direct SBERT (`0.5080`) & Surface Lyrics (`0.4558`)**: Raw 384-dim Transformer embeddings perform at random chance (`0.5080`), and adding either SBERT (`0.6249`) or fold-fit BERTopic (`0.6237`) to M1 provides no predictive gain (mean $\Delta\text{AUC} = -0.0363$; note that a paired $t$-test across 5 correlated CV folds, $p = 0.078$, is underpowered and non-independent, so we conclude there is no reliable evidence of improvement).
         """)
@@ -442,14 +442,14 @@ with tabs[1]:
         fig_2024.add_vline(x=0.50, line_dash="dash", line_color="#EF4444")
         fig_2024.update_layout(yaxis={'categoryorder': 'total ascending'}, height=380, xaxis_range=[0.25, 0.78])
         st.plotly_chart(fig_2024, use_container_width=True)
-        st.markdown("""
+        st.markdown(r"""
         * **Restricting to 2024–2026 Releases Collapses M1 (`0.5239 ± 0.1087`)**: Note that in our pipeline (`Scripts/m1_bertopic_model.py`), `M1` on the 2024+ cohort includes both `release_year` (2024, 2025, 2026) and `genre_cleaned`.
         * Even within 2024+, residual left-truncation exists between 2024 releases (40.0% window Top 50 rate, $n=40$) and in-window 2025–2026 releases (54.0%, $n=276$), yielding `AUC = 0.5424` for Release Year Only and `0.5667 ± 0.1346` for Genre Only—all within one standard deviation of random guessing (`0.50`).
         """)
 
     st.markdown("---")
     st.subheader("Statistical Screening Summary: Track-Level vs. Artist-Cluster Level ($N = 191$)")
-    st.markdown("""
+    st.markdown(r"""
     **Why Cluster-Level Verification Matters (Direction of Non-Independence Bias):**  
     When prolific artists (e.g., Taylor Swift, Drake, Olivia Rodrigo, Ariana Grande with 10+ tracks) contribute multiple songs, treating tracks as independent observations underestimates standard errors and **inflates Type I error (false positives)**. This bias threatens *statistically significant* track-level associations (`Release Year`, `Superstar Volume`, `Genre`), NOT our null lyrical results. Below, we report both naive track-level tests ($N=582$) and **Artist-Cluster aggregated tests ($N=191$ independent clusters)**, and we consolidate the 31 raw iTunes genres (where 23/31 had expected counts $<5$) into **8 Macro-Genres** where every cell satisfies expected count $\ge 5.48$:
     """)
@@ -507,7 +507,7 @@ with tabs[1]:
 # ==============================================================================
 with tabs[2]:
     st.header("Act 3: Lyrical Themes & Benchmark Database")
-    st.markdown("""
+    st.markdown(r"""
     While lyrical themes do not predict chart rank in supervised classification, fitting **BERTopic** on the full 582-track corpus segments songs into descriptive thematic clusters: **459 tracks (78.9%)** map into **24 non-outlier topics**, while **123 tracks (21.1%)** are assigned by HDBSCAN to **`Topic -1` (unclustered outliers**, which converted to the Top 50 at **34.1%**, 42/123 tracks).
     """)
     
@@ -568,7 +568,7 @@ with tabs[2]:
         )
         st.plotly_chart(fig_topics, use_container_width=True)
         
-        st.warning("""
+        st.warning(r"""
         **Statistical Reality Check on Thematic Differences**:  
         * **Global Contingency & Permutation Tests Are Null ($p > 0.05$)**: Across the 24 clustered topics ($n = 459, df = 23$), Pearson $\chi^2 = 33.48$ yields asymptotic $p = 0.0731$ and Monte Carlo permutation $p = 0.0702$ (10,000 permutations). Including the $n = 123$ unclustered `Topic -1` tracks ($N = 582, df = 24$) yields $\chi^2 = 35.52$, asymptotic $p = 0.0611$, and permutation $p = 0.0581$. When aggregated to the artist-cluster level ($N = 131$ clusters), Kruskal-Wallis $H = 17.42, p = 0.7399$.
         * **Sparse Cells & Multiple Testing**: Exactly **6 of the 24 topics** (those with $n \le 12$) have expected Top 50 cell counts $< 5$. While 2 of the 24 unadjusted 95% Wilson intervals—*High-Energy K-Pop & Performance Hooks* (`64.3%`, CI `[45.8%, 79.3%]`) and *Club Grooves & Flirtation* (`22.6%`, CI `[13.5%, 35.5%]`)—barely exclude the 39.2% baseline, testing 24 intervals simultaneously at $\alpha = 0.05$ expects $24 \times 0.05 = 1.2$ false positives by chance alone (none survive Bonferroni correction at $\alpha = 0.0021$). Moreover, the K-Pop cluster reflects a genre/fandom release effect rather than a pure lyric theme.
@@ -578,7 +578,7 @@ with tabs[2]:
     
     # Clarified Purpose of the Database
     st.subheader("Explore Songs in the Dataset: Benchmark Repository (All 582 Tracks)")
-    st.markdown("""<div style="background-color: #1E293B; padding: 18px; border-radius: 10px; border-left: 4px solid #38BDF8; margin-bottom: 20px;">
+    st.markdown(r"""<div style="background-color: #1E293B; padding: 18px; border-radius: 10px; border-left: 4px solid #38BDF8; margin-bottom: 20px;">
 <h4 style="margin-top: 0; color: #38BDF8;">Purpose &amp; Guidance for Using the Database</h4>
 <p>This is an <b>Empirical Benchmark Repository</b> covering all 582 modeling tracks (459 clustered + 123 Topic -1 outliers):</p>
 <ol style="margin-bottom: 0;">
@@ -626,7 +626,7 @@ with tabs[2]:
 with tabs[3]:
     st.header("Act 4: Exploratory Patterns & Track Case Studies")
     
-    st.markdown("""<div style="background-color: #1E293B; padding: 18px 22px; border-radius: 8px; border-left: 4px solid #F59E0B; margin-bottom: 22px;">
+    st.markdown(r"""<div style="background-color: #1E293B; padding: 18px 22px; border-radius: 8px; border-left: 4px solid #F59E0B; margin-bottom: 22px;">
 <b>Methodological Clarification &amp; Scope:</b><br>
 Our primary statistical tests confirm that lyrics do not reliably predict Top 50 placement within the Top 200 (full-cohort BERTopic &chi;<sup>2</sup> <i>p</i> = 0.0731, artist-cluster Kruskal-Wallis <i>p</i> = 0.7399; 2024+ BERTopic &chi;<sup>2</sup> <i>p</i> = 0.2472; 2024+ classifier AUC = 0.5088). Furthermore, while genre correlates at the raw track level due to catalog age and superstar clustering, it loses statistical significance at the artist-cluster level (<i>p</i> = 0.1265) and drops to AUC = 0.5667 in the 2024+ cohort. The notes below examine <b>why apparent patterns in sub-cohorts are driven by confounding</b> rather than causal songwriting rules.
 </div>""", unsafe_allow_html=True)
@@ -635,19 +635,19 @@ Our primary statistical tests confirm that lyrics do not reliably predict Top 50
     
     colR1, colR2, colR3 = st.columns(3)
     with colR1:
-        st.markdown("""<div style="background-color: #1E293B; padding: 18px; border-radius: 8px; border-top: 4px solid #10B981; height: 100%;">
+        st.markdown(r"""<div style="background-color: #1E293B; padding: 18px; border-radius: 8px; border-top: 4px solid #10B981; height: 100%;">
 <h4 style="color: #10B981; margin-top: 0;">1. The 2024+ Topic 5 Artifact (82.6%)</h4>
 <p style="font-size: 0.9rem;">When BERTopic was <b>re-fit separately on the 2024+ cohort</b> (<i>N</i> = 316, where overall Top 50 baseline rate is <b>52.2%</b>, 165/316), its newly formed Topic 5 (<code>5_big_luck_thing_feeling</code>, confessional pop) showed 19/23 tracks (82.6%) in the Top 50.</p>
 <p style="font-size: 0.85rem; color: #94A3B8;"><b>Why This Is Confounded:</b> First, this comes from a separate 13-topic model fit on 2024+ tracks (where overall topic &chi;<sup>2</sup> = 16.04, <i>p</i> = 0.2472 is non-significant), not the full-cohort model (where Topic 8 had <i>n</i> = 18, 61.1%). Second, inspection of the 23 tracks reveals that <b>7 are Olivia Rodrigo deluxe tracks and 3 are Ariana Grande tracks</b>—meaning two mega-stars account for 10 of the 19 hits!</p>
 </div>""", unsafe_allow_html=True)
     with colR2:
-        st.markdown("""<div style="background-color: #1E293B; padding: 18px; border-radius: 8px; border-top: 4px solid #38BDF8; height: 100%;">
+        st.markdown(r"""<div style="background-color: #1E293B; padding: 18px; border-radius: 8px; border-top: 4px solid #38BDF8; height: 100%;">
 <h4 style="color: #38BDF8; margin-top: 0;">2. Why Track-Level Genre Collapses</h4>
 <p style="font-size: 0.9rem;">In the full 582-track corpus, consolidated Macro-Genres show track-level differences (Pop 48.7% and K-Pop 48.3% vs Rock/Alt 30.5% and R&amp;B/Soul 20.7%, &chi;<sup>2</sup> <i>p</i> = 6.89e-05).</p>
 <p style="font-size: 0.85rem; color: #94A3B8;"><b>Why This Is Confounded:</b> Two mechanisms drive this: (1) Rock/Alt tracks in the Top 200 are overwhelmingly older catalog classics observed on their decay tail, and (2) prolific Pop/K-Pop superstars contribute dozens of tracks. When aggregated to the 191 independent artist clusters, genre differences become statistically non-significant (<i>p</i> = 0.1265).</p>
 </div>""", unsafe_allow_html=True)
     with colR3:
-        st.markdown("""<div style="background-color: #1E293B; padding: 18px; border-radius: 8px; border-top: 4px solid #F59E0B; height: 100%;">
+        st.markdown(r"""<div style="background-color: #1E293B; padding: 18px; border-radius: 8px; border-top: 4px solid #F59E0B; height: 100%;">
 <h4 style="color: #F59E0B; margin-top: 0;">3. Repetition vs. Vocabulary Richness</h4>
 <p style="font-size: 0.9rem;">Commercial songwriting folklore frequently claims that maximizing chorus line repetition or simplifying vocabulary guarantees a higher chart peak.</p>
 <p style="font-size: 0.85rem; color: #94A3B8;"><b>Empirical Reality:</b> Across all 582 tracks, genuine line-level repetition (median 31.8% vs 33.3%, <i>p</i> = 0.2154) and lexical diversity TTR (median 0.372 vs 0.365, <i>p</i> = 0.3255) show zero statistical relationship with reaching the Top 50.</p>
@@ -655,7 +655,7 @@ Our primary statistical tests confirm that lyrics do not reliably predict Top 50
 
     st.markdown("---")
     st.subheader("Illustrative Track Profiles: Dataset Records vs. External Industry Context")
-    st.markdown("""
+    st.markdown(r"""
     Below are five illustrative charting tracks across our full cohort ($N=582$). To maintain strict separation between **variables measured in our dataset** and **external qualitative context**, we report the exact CSV columns alongside strictly textual lyric descriptions and external industry background:
     """)
     
@@ -710,7 +710,7 @@ Our primary statistical tests confirm that lyrics do not reliably predict Top 50
 with tabs[4]:
     st.header("Act 5: Does This Project Actually Help Emerging Artists & Songwriters?")
     
-    st.markdown("""<div style="background-color: #0F172A; padding: 24px; border-radius: 10px; border-left: 5px solid #EF4444; margin-bottom: 24px;">
+    st.markdown(r"""<div style="background-color: #0F172A; padding: 24px; border-radius: 10px; border-left: 5px solid #EF4444; margin-bottom: 24px;">
 <h3 style="color: #F87171; margin-top: 0; font-size: 1.2rem;">The Cold, Honest Answer: 0% Value as a "Hit Songwriting Formula"</h3>
 <p style="font-size: 0.96rem; line-height: 1.7; margin-bottom: 0;">
 If an emerging songwriter or independent artist opens this project hoping to learn <b>"how to write lyrics that guarantee a Top 50 hit,"</b> this study offers <b>zero prescriptive songwriting formulas</b>. Because our empirical data proved that lyric length, chorus repetition, vocabulary simplicity, emotional tone, and lyrical topics have no statistical power to separate Top 50 hits from lower-charting songs, giving you a "magic checklist of words or themes to write" would be fabricating advice that contradicts the evidence.
@@ -718,13 +718,13 @@ If an emerging songwriter or independent artist opens this project hoping to lea
 </div>""", unsafe_allow_html=True)
 
     st.subheader("Where This Audit DOES Help: The 'Anti-Playbook' (What NOT to Waste Time On)")
-    st.markdown("""
+    st.markdown(r"""
     While data science cannot write a hit song for you, **proving what does NOT work is just as valuable for decision-making**. For an emerging artist with limited time, energy, and budget, our findings provide three practical lessons on **traps to avoid**:
     """)
 
     colG1, colG2, colG3 = st.columns(3)
     with colG1:
-        st.markdown("""<div style="background-color: #1E293B; padding: 20px; border-radius: 10px; border-top: 4px solid #10B981; height: 100%;">
+        st.markdown(r"""<div style="background-color: #1E293B; padding: 20px; border-radius: 10px; border-top: 4px solid #10B981; height: 100%;">
 <h4 style="color: #10B981; margin-top: 0;">1. Ignore Fake "Lyric Formulas" (Keep Your Creative Freedom)</h4>
 <p style="font-size: 0.92rem; line-height: 1.65;">
 Commercial songwriting blogs and self-proclaimed industry gurus often tell new artists: <i>"Keep your lyrics under 250 words," "Repeat your chorus line at least 40% of the time,"</i> or <i>"Use simpler vocabulary so listeners don't skip."</i>
@@ -735,7 +735,7 @@ Commercial songwriting blogs and self-proclaimed industry gurus often tell new a
 </div>""", unsafe_allow_html=True)
 
     with colG2:
-        st.markdown("""<div style="background-color: #1E293B; padding: 20px; border-radius: 10px; border-top: 4px solid #38BDF8; height: 100%;">
+        st.markdown(r"""<div style="background-color: #1E293B; padding: 20px; border-radius: 10px; border-top: 4px solid #38BDF8; height: 100%;">
 <h4 style="color: #38BDF8; margin-top: 0;">2. Don't Blindly Copy Superstar Lyric Trends</h4>
 <p style="font-size: 0.92rem; line-height: 1.65;">
 When emerging artists see a specific lyric style—such as raw, diary-like heartbreak confessions—dominating the Top 50, it is tempting to think, <i>"If I write about that exact same topic, my song will chart higher too."</i>
@@ -746,7 +746,7 @@ When emerging artists see a specific lyric style—such as raw, diary-like heart
 </div>""", unsafe_allow_html=True)
 
     with colG3:
-        st.markdown("""<div style="background-color: #1E293B; padding: 20px; border-radius: 10px; border-top: 4px solid #F59E0B; height: 100%;">
+        st.markdown(r"""<div style="background-color: #1E293B; padding: 20px; border-radius: 10px; border-top: 4px solid #F59E0B; height: 100%;">
 <h4 style="color: #F59E0B; margin-top: 0;">3. Invest Your Energy Outside the Lyric Sheet</h4>
 <p style="font-size: 0.92rem; line-height: 1.65;">
 Every machine learning model we trained on lyric text alone performed no better than a coin toss. Once a song's writing meets basic professional standards, endlessly tweaking individual words will not move it into the Top 50.
@@ -786,28 +786,28 @@ Every machine learning model we trained on lyric text alone performed no better 
 # ==============================================================================
 with tabs[5]:
     st.header("Act 6: Methodological Limitations & Future Horizons")
-    st.markdown("""
+    st.markdown(r"""
     A rigorous data science audit requires transparent disclosure of target-label artifacts, sample range restriction, omitted variables, and statistical dependencies.
     """)
     
     colL1, colL2 = st.columns(2)
     with colL1:
         st.subheader("1. Target Label Left-Truncation (Observation Window Artifact)")
-        st.markdown("""
+        st.markdown(r"""
         * **The Mechanism**: Our binary outcome $y = (\text{best\_rank\_this\_year} \le 50)$ captures a song's highest rank **within the 53-week observation window (Sept 2025–Sept 2026)**, not its launch-year peak.
         * **Empirical Consequence**: Songs released before Sept 2025 are observed only on their downward post-peak decay tail. Pre-2024 songs in our cohort achieved a **45.1% all-time Top 50 rate** (median all-time peak `#59.0`), but only **23.7%** in our 2025–2026 window (median `#99.0`, mean decay gap `+30.7` ranks). Similarly, 2024 releases dropped from **75.0% all-time** (median `#6.5`) to **40.0% in-window** (median `#85.5`, mean gap `+58.8` ranks).
         * **Why It Matters**: The strong association between `Release Year` and $y$ ($p = 3.47 \times 10^{-11}$, `AUC = 0.6676`) reflects **window left-truncation** as much as real-world catalog aging. While our sensitivity checks in Act 1 confirm that lyrics remain null even among in-window 2025–2026 releases ($N=276, p > 0.43$) and under an `all_time_peak_rank <= 50` target ($p > 0.25$), future studies should align observation windows strictly to each track's first $K$ weeks post-release.
         """)
         
         st.subheader("2. Range Restriction & Survivorship Bias")
-        st.markdown("""
+        st.markdown(r"""
         * **The Bottleneck**: Every song in our dataset already reached the Spotify Global Top 200—an elite commercial tier representing a tiny fraction of all released music.
         * **Unmeasured Hygiene Hypothesis**: We conceptualize songwriting craft as a *hygiene factor* (a baseline threshold assumed to be largely satisfied among charting tracks), though we emphasize that "lyric quality" is an unmeasured theoretical construct here rather than a quantified metric. Comparing Top 50 vs. ranks 51–200 cannot test whether lyrics differentiate charting songs from **released but low-stream (non-charting)** tracks.
         """)
 
     with colL2:
         st.subheader("3. Omitted Commercial & Audio Variables")
-        st.markdown("""
+        st.markdown(r"""
         * **Unobserved Marketing & Distribution Drivers**: Chart rank within the Top 200 is heavily shaped by variables absent from lyric text:
           - Editorial playlist placement (*Today's Top Hits*, *New Music Friday*) and autoplay queueing
           - Short-form video velocity (TikTok / Reels usage) and external celebrity capital
@@ -816,7 +816,7 @@ with tabs[5]:
         """)
         
         st.subheader("4. Multi-Track Artist Non-Independence & Modeling Scope")
-        st.markdown("""
+        st.markdown(r"""
         * **Type I Error Inflation in Track-Level Tests**: Treating multiple songs by the same superstar as independent observations underestimates standard errors and **inflates false positives (Type I error)** in track-level $\chi^2$ and Mann-Whitney tests. As shown in Act 2, when we aggregate from $N=582$ tracks to $N=191$ independent artist clusters, Macro-Genre loses statistical significance ($p = 6.89 \times 10^{-5} \rightarrow p = 0.1265$).
         * **Descriptive vs. Cross-Validated BERTopic**: While our 5-fold classifier fit BERTopic strictly inside each training fold, the descriptive topic charts in Act 3 and Act 4 were fit on the pooled 582-track and 316-track cohorts for exploratory visualization.
         * **Exact Attrition Accounting ($885 \rightarrow 582$)**: 885 raw unique songs $\rightarrow$ 709 English tracks $\rightarrow$ 669 deduplicated songs $\rightarrow$ 596 after initial `track_type` holiday/event filter $\rightarrow$ **582 final modeling tracks** after removing 14 residual holiday songs (11 with Holiday/Christmas genre metadata missed by initial script ordering + 3 untagged carols surfaced during BERTopic inspection).
@@ -824,7 +824,7 @@ with tabs[5]:
 
     st.markdown("---")
     st.subheader("Roadmap for Future Research")
-    st.markdown("""
+    st.markdown(r"""
     1. **Release-Aligned Survival & Cohort Design**: Track every song for a fixed window (e.g., Weeks 1 to 12 post-release) to eliminate left-truncation and separate debut velocity from multi-year longevity.
     2. **Incorporate Non-Charting Negative Controls**: Sample released but low-stream (non-charting) tracks matched by release week and distributor tier to test whether lyrics help songs enter the Top 200.
     3. **Multimodal Audio-Text Fusion**: Combine lyric embeddings with acoustic representations (e.g., spectrogram embeddings, BPM, harmonic novelty) to isolate vocal and production effects from text.
@@ -836,12 +836,12 @@ with tabs[5]:
 # ==============================================================================
 with tabs[6]:
     st.header("Act 7: Incidental Data Quality Audit")
-    st.markdown("""
+    st.markdown(r"""
     While Sentence-BERT and BERTopic did not improve downstream chart rank prediction, inspecting their unsupervised clusters during exploratory data analysis provided a **practical workflow convenience**: surfacing residual seasonal tracks that had bypassed our initial metadata filter.
     """)
     
     st.subheader("How Unsupervised Clustering Surfaced Residual Holiday Tracks")
-    st.markdown("""
+    st.markdown(r"""
     During initial dataset construction (`Scripts/build_dataset.py`), seasonal tracks were flagged using a title regex and a genre check (`track_type == 'holiday'`), removing 72 holiday tracks and 1 event anthem ($669 \rightarrow 596$ tracks in `EDA_spotify_lyrics.ipynb`).  
     However, 14 seasonal songs remained in the 596-track EDA corpus due to two pipeline gaps:
     1. **Script Precedence & Genre Tag Omissions (11 tracks)**: In `build_dataset.py`, remix detection (`'remix'` in title) executed *before* holiday detection (causing *Little Saint Nick - 1991 Remix* to be labeled `remix`), and several tracks with `Holiday` or `Christmas` in their iTunes genre field had `track_type == 'standard'`.
@@ -880,13 +880,13 @@ with tabs[6]:
 
     st.markdown("---")
     st.subheader("Realistic Scope for Unsupervised NLP in Catalog Maintenance")
-    st.markdown("""
+    st.markdown(r"""
     To avoid overstating this incidental finding, we emphasize that **Transformer clustering is not necessary for simple keyword filtering** (where a regex over lyric text is faster, deterministic, and cheaper). Rather, unsupervised embedding clusters can serve as an **exploratory diagnostic aid** when analysts do not know in advance which anomalous categories exist in a messy corpus:
     """)
 
     colU1, colU2 = st.columns(2)
     with colU1:
-        st.markdown("""<div style="background-color: #1E293B; padding: 18px; border-radius: 8px; border-top: 4px solid #38BDF8; height: 100%;">
+        st.markdown(r"""<div style="background-color: #1E293B; padding: 18px; border-radius: 8px; border-top: 4px solid #38BDF8; height: 100%;">
 <h4 style="color: #38BDF8; margin-top: 0;">1. Unanticipated Ingestion Auditing</h4>
 <p style="font-size: 0.9rem;">Rule-based regex filters work well when the target words are known a priori (e.g., holiday keywords), but fail when unexpected sub-corpora (e.g., comedy skits, children's nursery rhymes, or soundtrack dialogue) enter a chart dataset under generic <code>Pop</code> tags.</p>
 <p style="font-size: 0.85rem; color: #94A3B8;"><b>Practical Role:</b> Unsupervised clustering groups semantically similar outliers together during EDA so human analysts can spot unanticipated pipeline leaks and write deterministic rules to fix them.</p>
@@ -894,14 +894,14 @@ with tabs[6]:
         
         st.markdown("<div style='height: 15px;'></div>", unsafe_allow_html=True)
         
-        st.markdown("""<div style="background-color: #1E293B; padding: 18px; border-radius: 8px; border-top: 4px solid #10B981; height: 100%;">
+        st.markdown(r"""<div style="background-color: #1E293B; padding: 18px; border-radius: 8px; border-top: 4px solid #10B981; height: 100%;">
 <h4 style="color: #10B981; margin-top: 0;">2. Cold-Start Descriptive Tagging</h4>
 <p style="font-size: 0.9rem;">Newly uploaded tracks lack user co-listening graphs. While audio models capture tempo and instrumentation, they do not index lyrical subject matter.</p>
 <p style="font-size: 0.85rem; color: #94A3B8;"><b>Practical Role:</b> Lightweight text embeddings provide a descriptive thematic index for catalog search (unrelated to predicting commercial chart rank).</p>
 </div>""", unsafe_allow_html=True)
 
     with colU2:
-        st.markdown("""<div style="background-color: #1E293B; padding: 18px; border-radius: 8px; border-top: 4px solid #F59E0B; height: 100%;">
+        st.markdown(r"""<div style="background-color: #1E293B; padding: 18px; border-radius: 8px; border-top: 4px solid #F59E0B; height: 100%;">
 <h4 style="color: #F59E0B; margin-top: 0;">3. Sync Licensing &amp; Thematic Retrieval</h4>
 <p style="font-size: 0.9rem;">Music supervisors searching for television or film sync placements often query by narrative scenario (e.g., moving away from a hometown) rather than rigid iTunes genre labels.</p>
 <p style="font-size: 0.85rem; color: #94A3B8;"><b>Practical Role:</b> Semantic similarity search over lyric embeddings allows qualitative retrieval across catalog archives without claiming predictive hit power.</p>
@@ -909,7 +909,7 @@ with tabs[6]:
         
         st.markdown("<div style='height: 15px;'></div>", unsafe_allow_html=True)
         
-        st.markdown("""<div style="background-color: #1E293B; padding: 18px; border-radius: 8px; border-top: 4px solid #EC4899; height: 100%;">
+        st.markdown(r"""<div style="background-color: #1E293B; padding: 18px; border-radius: 8px; border-top: 4px solid #EC4899; height: 100%;">
 <h4 style="color: #EC4899; margin-top: 0;">4. Human-in-the-Loop Data Hygiene</h4>
 <p style="font-size: 0.9rem;">As demonstrated in our own 669 &rarr; 596 &rarr; 582 attrition pipeline, automated rules and unsupervised clustering are complementary rather than competing tools.</p>
 <p style="font-size: 0.85rem; color: #94A3B8;"><b>Practical Role:</b> Clustering surfaces candidate anomalies during exploratory audits, which engineers then codify into fast, reproducible regex/metadata masks.</p>
@@ -922,7 +922,7 @@ with tabs[6]:
 
 # --- Footer ---
 st.markdown("---")
-st.markdown("""<div style="text-align: center; font-size: 0.85rem; color: #64748B;">
+st.markdown(r"""<div style="text-align: center; font-size: 0.85rem; color: #64748B;">
 <b>Spotify-TOP200-Lyrics Project Deliverable</b> | 
 Evaluated with 5-Fold Artist-Cluster Grouped Cross-Validation (191 Connected Collaboration Components) | 
 Fold-Internal BERTopic Fitting &amp; Direct 384-Dim SBERT Verification
