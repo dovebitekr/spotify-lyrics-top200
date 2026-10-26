@@ -51,6 +51,23 @@ TOPIC_DISPLAY_ALIASES = {
     23: "Triumphant Motivation & Fighter Anthems"
 }
 
+def clean_profanity_display(word: str) -> str:
+    """Mask explicit terms for respectful presentation (Radio Edit style)."""
+    import re
+    w = str(word)
+    replacements = [
+        (r'\b(nigg[a-z]*)\b', 'n*****'),
+        (r'\b(fuck[a-z]*)\b', 'f***'),
+        (r'\b(bitch[a-z]*)\b', 'b****'),
+        (r'\b(shit[a-z]*)\b', 's***'),
+        (r'\b(pussy|cunt)\b', 'p****'),
+        (r'\b(asshole)\b', 'a******'),
+        (r'\b(hoe[a-z]*)\b', 'h**'),
+    ]
+    for pat, rep in replacements:
+        w = re.sub(pat, rep, w, flags=re.IGNORECASE)
+    return w
+
 def _calc_line_repetition(text: str) -> float:
     """Compute line-level repetition rate: 1 - (unique lines / total non-empty lines)."""
     lines = [line.strip().lower() for line in str(text).splitlines() if line.strip()]
@@ -437,9 +454,9 @@ Yet, this unclustered group achieved <b>42 Top 50 hits (34.1% hit rate)</b>, inc
         c_meta1.metric("Songs in Category", f"{n_total} songs")
         c_meta2.metric("Top 50 Hits", f"{t50_count} hits ({hit_rate:.1f}%)")
         
-        # Tag Badges for Core Keywords
+        # Tag Badges for Core Keywords (Clean Radio Edit)
         badges_html = " ".join([
-            f'<span style="display: inline-block; background-color: #1E293B; color: #38BDF8; border: 1px solid #334155; padding: 4px 10px; margin: 3px 4px 3px 0; border-radius: 14px; font-size: 0.82rem; font-weight: 500;">#{word}</span>'
+            f'<span style="display: inline-block; background-color: #1E293B; color: #38BDF8; border: 1px solid #334155; padding: 4px 10px; margin: 3px 4px 3px 0; border-radius: 14px; font-size: 0.82rem; font-weight: 500;">#{clean_profanity_display(word)}</span>'
             for word in keyword_list
         ])
         st.markdown(f"""
@@ -572,6 +589,9 @@ with tabs[4]:
             theme_choice = st.selectbox("Filter by lyrical theme:", ["All Lyrical Themes (N = 582)"] + list(TOPIC_DISPLAY_ALIASES.values()))
             
         display_df = songs_df.copy()
+        if "topic_keywords" in display_df.columns:
+            display_df["topic_keywords"] = display_df["topic_keywords"].apply(clean_profanity_display)
+            
         if search_query.strip():
             m1 = display_df["artist_names"].str.contains(search_query, case=False, na=False)
             m2 = display_df["track_name"].str.contains(search_query, case=False, na=False)
