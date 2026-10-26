@@ -515,11 +515,4 @@ with tabs[4]:
             use_container_width=True
         )
 
-# ==============================================================================
-# FOOTER: PROJECT CREDITS & REPOSITORY
-# ==============================================================================
-st.markdown("---")
-st.caption(
-    "Data Science Mini-Project | University of Helsinki | Target Audience: Emerging Songwriters & Creators | "
-    "Full technical methodology, cross-validation metrics, and preprocessing details are documented in the accompanying 5-page Technical Report."
-)
+
