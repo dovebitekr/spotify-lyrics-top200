@@ -1,0 +1,25 @@
+.env
+venv
+.venv
+ds_mini/
+.vscode/
+.python-version
+__pycache__/
+*.py[cod]
+.DS_Store
+*/.DS_Store
+.cache
+# Ignore raw weekly Spotify charts and intermediate data
+spotify_data/regional-global-weekly-*.csv
+spotify_data/final_dataset_for_ml_enriched.csv
+
+# Local exploratory files and backups
+meta/
+sandbox.ipynb
+reports/
+# Technical Report & Local Word/PDF Generation
+*Technical_Report*
+generate_word_report.py
+artifacts/report_figures/
+reports/
+app_technical_backup.py

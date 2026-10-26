@@ -1,0 +1,1007 @@
+{
+  "dataset": {
+    "rows": 582,
+    "target_rate": 0.3917525773195876,
+    "artist_clusters": 191,
+    "cohort": "all eligible release years",
+    "holiday_and_event_tracks_excluded": true
+  },
+  "text_processing": {
+    "embedding_model": "all-MiniLM-L6-v2",
+    "chunk_token_limit": "embedding_model_max_seq_length_minus_special_tokens",
+    "overlap_tokens": 32,
+    "song_level_embedding": "mean of normalized overlapping chunk embeddings, then L2-normalized",
+    "classifier_fits_topic_model_on_training_songs_only": true
+  },
+  "M1": {
+    "model_name": "M1",
+    "n_rows": 582,
+    "n_positive": 228,
+    "fold_metrics": [
+      {
+        "fold": 1,
+        "roc_auc": 0.5931142410015649,
+        "macro_f1": 0.5195922268238292
+      },
+      {
+        "fold": 2,
+        "roc_auc": 0.7694099378881988,
+        "macro_f1": 0.619672131147541
+      },
+      {
+        "fold": 3,
+        "roc_auc": 0.6982919254658386,
+        "macro_f1": 0.6405411533519765
+      },
+      {
+        "fold": 4,
+        "roc_auc": 0.7206062461726883,
+        "macro_f1": 0.6403688524590163
+      },
+      {
+        "fold": 5,
+        "roc_auc": 0.5242283950617284,
+        "macro_f1": 0.502127659574468
+      }
+    ],
+    "mean_roc_auc": 0.6611301491180038,
+    "mean_macro_f1": 0.5844604046713662
+  },
+  "M1_plus_BERTopic": {
+    "model_name": "M1 + BERTopic (song-level pooled)",
+    "n_rows": 582,
+    "n_positive": 228,
+    "fold_metrics": [
+      {
+        "fold": 1,
+        "roc_auc": 0.5616588419405321,
+        "macro_f1": 0.5195922268238292,
+        "topic_diagnostics": {
+          "train": {
+            "n_topics": 2,
+            "song_count": 466,
+            "topic_song_counts": {
+              "0": 440,
+              "1": 26
+            },
+            "topic_song_shares": {
+              "0": 0.944206008583691,
+              "1": 0.055793991416309016
+            },
+            "outlier_song_count": 0,
+            "outlier_song_share": 0.0,
+            "largest_non_outlier_topic_song_share": 0.944206008583691
+          },
+          "test": {
+            "n_topics": 1,
+            "song_count": 116,
+            "topic_song_counts": {
+              "1": 116
+            },
+            "topic_song_shares": {
+              "1": 1.0
+            },
+            "outlier_song_count": 0,
+            "outlier_song_share": 0.0,
+            "largest_non_outlier_topic_song_share": 1.0
+          },
+          "topic_terms": {
+            "0": [
+              "good",
+              "run",
+              "bad",
+              "dance",
+              "tonight",
+              "leave",
+              "talk",
+              "away",
+              "thing",
+              "stop"
+            ],
+            "1": [
+              "knife",
+              "red",
+              "eat eat",
+              "eat",
+              "pop",
+              "damn damn",
+              "damn",
+              "huh",
+              "alien",
+              "pop pop"
+            ]
+          }
+        }
+      },
+      {
+        "fold": 2,
+        "roc_auc": 0.7037267080745342,
+        "macro_f1": 0.6286203558930832,
+        "topic_diagnostics": {
+          "train": {
+            "n_topics": 22,
+            "song_count": 466,
+            "topic_song_counts": {
+              "-1": 58,
+              "0": 55,
+              "1": 45,
+              "2": 24,
+              "3": 22,
+              "4": 21,
+              "5": 20,
+              "6": 19,
+              "7": 18,
+              "8": 18,
+              "9": 18,
+              "10": 18,
+              "11": 17,
+              "12": 15,
+              "13": 14,
+              "14": 14,
+              "15": 13,
+              "16": 11,
+              "17": 10,
+              "18": 10,
+              "19": 9,
+              "20": 9,
+              "21": 8
+            },
+            "topic_song_shares": {
+              "-1": 0.12446351931330472,
+              "0": 0.11802575107296137,
+              "1": 0.09656652360515021,
+              "2": 0.05150214592274678,
+              "3": 0.04721030042918455,
+              "4": 0.045064377682403435,
+              "5": 0.04291845493562232,
+              "6": 0.0407725321888412,
+              "7": 0.03862660944206009,
+              "8": 0.03862660944206009,
+              "9": 0.03862660944206009,
+              "10": 0.03862660944206009,
+              "11": 0.03648068669527897,
+              "12": 0.032188841201716736,
+              "13": 0.030042918454935622,
+              "14": 0.030042918454935622,
+              "15": 0.027896995708154508,
+              "16": 0.023605150214592276,
+              "17": 0.02145922746781116,
+              "18": 0.02145922746781116,
+              "19": 0.019313304721030045,
+              "20": 0.019313304721030045,
+              "21": 0.017167381974248927
+            },
+            "outlier_song_count": 58,
+            "outlier_song_share": 0.12446351931330472,
+            "largest_non_outlier_topic_song_share": 0.11802575107296137
+          },
+          "test": {
+            "n_topics": 15,
+            "song_count": 116,
+            "topic_song_counts": {
+              "-1": 65,
+              "0": 10,
+              "1": 6,
+              "2": 1,
+              "3": 4,
+              "4": 2,
+              "5": 12,
+              "6": 3,
+              "7": 3,
+              "8": 2,
+              "10": 1,
+              "12": 2,
+              "17": 2,
+              "18": 1,
+              "20": 1,
+              "21": 1
+            },
+            "topic_song_shares": {
+              "-1": 0.5603448275862069,
+              "0": 0.08620689655172414,
+              "1": 0.05172413793103448,
+              "2": 0.008620689655172414,
+              "3": 0.034482758620689655,
+              "4": 0.017241379310344827,
+              "5": 0.10344827586206896,
+              "6": 0.02586206896551724,
+              "7": 0.02586206896551724,
+              "8": 0.017241379310344827,
+              "10": 0.008620689655172414,
+              "12": 0.017241379310344827,
+              "17": 0.017241379310344827,
+              "18": 0.008620689655172414,
+              "20": 0.008620689655172414,
+              "21": 0.008620689655172414
+            },
+            "outlier_song_count": 65,
+            "outlier_song_share": 0.5603448275862069,
+            "largest_non_outlier_topic_song_share": 0.10344827586206896
+          },
+          "topic_terms": {
+            "0": [
+              "niggas",
+              "shit",
+              "bitch",
+              "nigga",
+              "fuck",
+              "new",
+              "boy",
+              "body",
+              "okay",
+              "damn"
+            ],
+            "1": [
+              "jamaica",
+              "man",
+              "ba ba",
+              "long",
+              "mean",
+              "ba",
+              "click",
+              "nice",
+              "play",
+              "talk"
+            ],
+            "2": [
+              "purple rain",
+              "rain",
+              "purple",
+              "kind",
+              "sorry",
+              "fold",
+              "misery",
+              "evening",
+              "hope",
+              "dream"
+            ],
+            "3": [
+              "donkey",
+              "chanel",
+              "tonight",
+              "turn",
+              "favorite",
+              "donk",
+              "donkey donk",
+              "mo",
+              "tonight tonight",
+              "round"
+            ],
+            "4": [
+              "party",
+              "dance",
+              "party party",
+              "dead",
+              "doo",
+              "head",
+              "music",
+              "mama",
+              "floor",
+              "doo doo"
+            ],
+            "5": [
+              "knife",
+              "red",
+              "eat eat",
+              "eat",
+              "pop",
+              "lemonade",
+              "moving",
+              "huh",
+              "green",
+              "soda"
+            ],
+            "6": [
+              "daddy",
+              "crime",
+              "week",
+              "old",
+              "old old",
+              "seven",
+              "leave",
+              "friend",
+              "day",
+              "break"
+            ],
+            "7": [
+              "star",
+              "close",
+              "hopeless",
+              "place",
+              "eye",
+              "learn",
+              "haunt",
+              "turn",
+              "little bit",
+              "somebody"
+            ],
+            "8": [
+              "nah nah",
+              "nah",
+              "lonely",
+              "anymore",
+              "buh",
+              "hold",
+              "thing",
+              "chain",
+              "prayer",
+              "live"
+            ],
+            "9": [
+              "mum",
+              "american",
+              "read",
+              "okay okay",
+              "steady",
+              "huh",
+              "face",
+              "okay",
+              "huh huh",
+              "ready"
+            ],
+            "10": [
+              "hello",
+              "rain",
+              "hello hello",
+              "highway",
+              "god",
+              "entertain",
+              "hell",
+              "rock rock",
+              "rock",
+              "god god"
+            ],
+            "11": [
+              "share",
+              "run away",
+              "away",
+              "lonely",
+              "company",
+              "bird",
+              "away run",
+              "run",
+              "home home",
+              "day"
+            ],
+            "12": [
+              "touch touch",
+              "touch",
+              "lie",
+              "hold",
+              "thought",
+              "extra",
+              "answer",
+              "good",
+              "wrong",
+              "seal"
+            ],
+            "13": [
+              "eh",
+              "eh eh",
+              "sweat",
+              "bet",
+              "ocean",
+              "fall",
+              "soul",
+              "babe",
+              "shine",
+              "body"
+            ],
+            "14": [
+              "stay",
+              "wish",
+              "stay alive",
+              "alive",
+              "smoker",
+              "life",
+              "use",
+              "leave",
+              "help",
+              "maybe"
+            ],
+            "15": [
+              "ba",
+              "mama",
+              "sha",
+              "bad",
+              "bad bad",
+              "ba ba",
+              "ssa",
+              "ko ssa",
+              "ko",
+              "mama sa"
+            ],
+            "16": [
+              "fruit",
+              "max",
+              "shake",
+              "el",
+              "que",
+              "blow",
+              "lean",
+              "hand",
+              "blow kiss",
+              "mi"
+            ],
+            "17": [
+              "cha",
+              "cha cha",
+              "thing thing",
+              "thing",
+              "run head",
+              "deep deep",
+              "deep",
+              "hurt bad",
+              "head",
+              "head run"
+            ],
+            "18": [
+              "remember",
+              "summertime",
+              "ba",
+              "summer",
+              "remember remember",
+              "sadness",
+              "du",
+              "sun",
+              "forget forget",
+              "forget"
+            ],
+            "19": [
+              "pick",
+              "beat",
+              "beat beat",
+              "fight",
+              "ow ow",
+              "man",
+              "tonight fight",
+              "dish",
+              "ceiling",
+              "ow"
+            ],
+            "20": [
+              "believer",
+              "purple",
+              "sky",
+              "pain",
+              "rain",
+              "world",
+              "fate",
+              "sea",
+              "melt",
+              "walk world"
+            ],
+            "21": [
+              "good luck",
+              "luck",
+              "good",
+              "expectation",
+              "feeling",
+              "stop",
+              "stop world",
+              "somebody use",
+              "world stop",
+              "hope"
+            ]
+          }
+        }
+      },
+      {
+        "fold": 3,
+        "roc_auc": 0.6813664596273292,
+        "macro_f1": 0.6387939545834282,
+        "topic_diagnostics": {
+          "train": {
+            "n_topics": 2,
+            "song_count": 466,
+            "topic_song_counts": {
+              "0": 441,
+              "1": 25
+            },
+            "topic_song_shares": {
+              "0": 0.9463519313304721,
+              "1": 0.0536480686695279
+            },
+            "outlier_song_count": 0,
+            "outlier_song_share": 0.0,
+            "largest_non_outlier_topic_song_share": 0.9463519313304721
+          },
+          "test": {
+            "n_topics": 2,
+            "song_count": 116,
+            "topic_song_counts": {
+              "0": 115,
+              "1": 1
+            },
+            "topic_song_shares": {
+              "0": 0.9913793103448276,
+              "1": 0.008620689655172414
+            },
+            "outlier_song_count": 0,
+            "outlier_song_share": 0.0,
+            "largest_non_outlier_topic_song_share": 0.9913793103448276
+          },
+          "topic_terms": {
+            "0": [
+              "run",
+              "tonight",
+              "thing",
+              "leave",
+              "bad",
+              "dance",
+              "talk",
+              "fuck",
+              "heart",
+              "body"
+            ],
+            "1": [
+              "knife",
+              "red",
+              "eat eat",
+              "eat",
+              "pop",
+              "damn damn",
+              "pop pop",
+              "huh",
+              "alien",
+              "damn"
+            ]
+          }
+        }
+      },
+      {
+        "fold": 4,
+        "roc_auc": 0.6423759951010409,
+        "macro_f1": 0.6307522935779817,
+        "topic_diagnostics": {
+          "train": {
+            "n_topics": 21,
+            "song_count": 465,
+            "topic_song_counts": {
+              "-1": 56,
+              "0": 51,
+              "1": 38,
+              "2": 31,
+              "3": 29,
+              "4": 26,
+              "5": 24,
+              "6": 23,
+              "7": 22,
+              "8": 20,
+              "9": 19,
+              "10": 18,
+              "11": 14,
+              "12": 12,
+              "13": 12,
+              "14": 12,
+              "15": 11,
+              "16": 10,
+              "17": 10,
+              "18": 10,
+              "19": 9,
+              "20": 8
+            },
+            "topic_song_shares": {
+              "-1": 0.12043010752688173,
+              "0": 0.10967741935483871,
+              "1": 0.08172043010752689,
+              "2": 0.06666666666666667,
+              "3": 0.06236559139784946,
+              "4": 0.05591397849462366,
+              "5": 0.05161290322580645,
+              "6": 0.04946236559139785,
+              "7": 0.047311827956989246,
+              "8": 0.043010752688172046,
+              "9": 0.04086021505376344,
+              "10": 0.03870967741935484,
+              "11": 0.030107526881720432,
+              "12": 0.025806451612903226,
+              "13": 0.025806451612903226,
+              "14": 0.025806451612903226,
+              "15": 0.023655913978494623,
+              "16": 0.021505376344086023,
+              "17": 0.021505376344086023,
+              "18": 0.021505376344086023,
+              "19": 0.01935483870967742,
+              "20": 0.017204301075268817
+            },
+            "outlier_song_count": 56,
+            "outlier_song_share": 0.12043010752688173,
+            "largest_non_outlier_topic_song_share": 0.10967741935483871
+          },
+          "test": {
+            "n_topics": 18,
+            "song_count": 117,
+            "topic_song_counts": {
+              "-1": 57,
+              "0": 3,
+              "1": 5,
+              "2": 2,
+              "3": 5,
+              "4": 2,
+              "5": 2,
+              "6": 3,
+              "7": 6,
+              "8": 7,
+              "9": 3,
+              "10": 4,
+              "11": 2,
+              "12": 2,
+              "15": 2,
+              "16": 6,
+              "17": 2,
+              "18": 3,
+              "20": 1
+            },
+            "topic_song_shares": {
+              "-1": 0.48717948717948717,
+              "0": 0.02564102564102564,
+              "1": 0.042735042735042736,
+              "2": 0.017094017094017096,
+              "3": 0.042735042735042736,
+              "4": 0.017094017094017096,
+              "5": 0.017094017094017096,
+              "6": 0.02564102564102564,
+              "7": 0.05128205128205128,
+              "8": 0.05982905982905983,
+              "9": 0.02564102564102564,
+              "10": 0.03418803418803419,
+              "11": 0.017094017094017096,
+              "12": 0.017094017094017096,
+              "15": 0.017094017094017096,
+              "16": 0.05128205128205128,
+              "17": 0.017094017094017096,
+              "18": 0.02564102564102564,
+              "20": 0.008547008547008548
+            },
+            "outlier_song_count": 57,
+            "outlier_song_share": 0.48717948717948717,
+            "largest_non_outlier_topic_song_share": 0.05982905982905983
+          },
+          "topic_terms": {
+            "0": [
+              "shit",
+              "niggas",
+              "bitch",
+              "new",
+              "boy",
+              "fuck",
+              "nigga",
+              "okay",
+              "hm",
+              "fucking"
+            ],
+            "1": [
+              "lonely",
+              "nah nah",
+              "nah",
+              "away",
+              "miss",
+              "anymore",
+              "leave",
+              "buh",
+              "run away",
+              "maybe"
+            ],
+            "2": [
+              "jennie",
+              "body",
+              "work",
+              "work work",
+              "long",
+              "click",
+              "pinky",
+              "skrrt",
+              "play",
+              "click click"
+            ],
+            "3": [
+              "good",
+              "luck",
+              "good luck",
+              "feeling",
+              "big",
+              "thing",
+              "bad thing",
+              "talk anymore",
+              "use",
+              "bad"
+            ],
+            "4": [
+              "rain",
+              "swim",
+              "dive",
+              "pain leave",
+              "leave pain",
+              "purple rain",
+              "purple",
+              "wait",
+              "pain",
+              "leave"
+            ],
+            "5": [
+              "dance",
+              "rock",
+              "dead",
+              "doo",
+              "floor",
+              "jamaica",
+              "music",
+              "mama",
+              "doo doo",
+              "dance dance"
+            ],
+            "6": [
+              "dirty",
+              "scrub",
+              "ba ba",
+              "american",
+              "read",
+              "talk",
+              "mean",
+              "ba",
+              "face",
+              "talk talk"
+            ],
+            "7": [
+              "save tear",
+              "kind",
+              "ask",
+              "save",
+              "believer",
+              "tear",
+              "misery",
+              "help",
+              "hope",
+              "evening"
+            ],
+            "8": [
+              "eat eat",
+              "eat",
+              "damn damn",
+              "alien",
+              "pop",
+              "lemonade",
+              "pop pop",
+              "knock",
+              "fantasy",
+              "huh"
+            ],
+            "9": [
+              "stay",
+              "fold",
+              "training",
+              "season",
+              "able",
+              "willing",
+              "good",
+              "stay stay",
+              "tired",
+              "leave"
+            ],
+            "10": [
+              "ba",
+              "mama",
+              "sha",
+              "bad",
+              "bad bad",
+              "ba ba",
+              "pick",
+              "pick pick",
+              "mama mama",
+              "beat"
+            ],
+            "11": [
+              "doo doo",
+              "doo",
+              "thing thing",
+              "thing",
+              "run head",
+              "deep deep",
+              "head",
+              "deep",
+              "company",
+              "mental"
+            ],
+            "12": [
+              "favorite",
+              "upside",
+              "round",
+              "turn",
+              "round round",
+              "backseat",
+              "world",
+              "innocence",
+              "boy turn",
+              "world world"
+            ],
+            "13": [
+              "stop",
+              "chanel",
+              "force",
+              "stop stop",
+              "kiss",
+              "little",
+              "mouth",
+              "hard",
+              "young",
+              "willing"
+            ],
+            "14": [
+              "tonight",
+              "cha",
+              "cha cha",
+              "good",
+              "tonight tonight",
+              "heat",
+              "week",
+              "seven",
+              "lucky",
+              "wave"
+            ],
+            "15": [
+              "shit",
+              "friday",
+              "free",
+              "free free",
+              "niggas",
+              "thought",
+              "battle",
+              "people",
+              "add",
+              "credit"
+            ],
+            "16": [
+              "word",
+              "sound",
+              "mean",
+              "heal",
+              "break",
+              "somebody",
+              "close",
+              "open",
+              "fix",
+              "star"
+            ],
+            "17": [
+              "wish",
+              "stay",
+              "wish stay",
+              "smoker",
+              "use",
+              "toxic",
+              "dial",
+              "stay stay",
+              "play pretend",
+              "stay watch"
+            ],
+            "18": [
+              "thriller",
+              "sunlight",
+              "wedding",
+              "run",
+              "eye",
+              "turn",
+              "tonight",
+              "stop",
+              "end",
+              "bright"
+            ],
+            "19": [
+              "donkey",
+              "animal",
+              "donkey donk",
+              "donk",
+              "li",
+              "ny",
+              "dew",
+              "morning",
+              "watch",
+              "thing thing"
+            ],
+            "20": [
+              "god",
+              "god god",
+              "rock rock",
+              "heaven",
+              "mmm",
+              "rock",
+              "aw",
+              "sky",
+              "knife",
+              "angel"
+            ]
+          }
+        }
+      },
+      {
+        "fold": 5,
+        "roc_auc": 0.529320987654321,
+        "macro_f1": 0.5126845891707686,
+        "topic_diagnostics": {
+          "train": {
+            "n_topics": 2,
+            "song_count": 465,
+            "topic_song_counts": {
+              "0": 445,
+              "1": 20
+            },
+            "topic_song_shares": {
+              "0": 0.956989247311828,
+              "1": 0.043010752688172046
+            },
+            "outlier_song_count": 0,
+            "outlier_song_share": 0.0,
+            "largest_non_outlier_topic_song_share": 0.956989247311828
+          },
+          "test": {
+            "n_topics": 2,
+            "song_count": 117,
+            "topic_song_counts": {
+              "-1": 5,
+              "0": 1,
+              "1": 111
+            },
+            "topic_song_shares": {
+              "-1": 0.042735042735042736,
+              "0": 0.008547008547008548,
+              "1": 0.9487179487179487
+            },
+            "outlier_song_count": 5,
+            "outlier_song_share": 0.042735042735042736,
+            "largest_non_outlier_topic_song_share": 0.9487179487179487
+          },
+          "topic_terms": {
+            "0": [
+              "run",
+              "thing",
+              "leave",
+              "talk",
+              "day",
+              "man",
+              "away",
+              "light",
+              "eye",
+              "turn"
+            ],
+            "1": [
+              "knife",
+              "red",
+              "pop",
+              "damn damn",
+              "alien",
+              "lemonade",
+              "pop pop",
+              "damn",
+              "fantasy",
+              "moving"
+            ]
+          }
+        }
+      }
+    ],
+    "mean_roc_auc": 0.6236897984795515,
+    "mean_macro_f1": 0.5860886840098183,
+    "topic_modeling": {
+      "embedding_model": "all-MiniLM-L6-v2",
+      "max_tokens_per_chunk": 254,
+      "overlap_tokens": 32,
+      "clustering_unit": "song",
+      "song_embedding": "mean of normalized overlapping chunk embeddings, then L2-normalized",
+      "umap": {
+        "n_neighbors": 5,
+        "n_components": 5,
+        "min_dist": 0.0,
+        "metric": "cosine",
+        "random_state": 42
+      },
+      "hdbscan": {
+        "min_cluster_size": 8,
+        "min_samples": 1,
+        "metric": "euclidean",
+        "cluster_selection_method": "eom",
+        "prediction_data": true
+      }
+    }
+  }
+}
