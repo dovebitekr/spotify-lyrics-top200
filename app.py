@@ -126,7 +126,7 @@ If you spend time on songwriting blogs, TikTok masterclasses, or YouTube music t
 <br><i>"Copy the latest diary-breakup formula if you want a streaming hit."</i>
 </p>
 <p>
-We analyzed <b>582 English charting songs</b> across 53 weekly Spotify Global Top 200 charts to test whether these rules actually separate songs that break into the <b>Global Top 50</b> from songs that stay in <b>ranks 51–200</b>.
+We analysed <b>582 English charting songs</b> across 53 weekly Spotify Global Top 200 charts to test whether these rules actually separate songs that break into the <b>Global Top 50</b> from songs that stay in <b>ranks 51–200</b>.
 </p>
 </div>
 <div>
@@ -359,7 +359,7 @@ If your song fails to chart or peaks at rank 150 instead of rank 20, <b>do not b
 with tabs[2]:
     st.header("3. Lyrical Themes: Aesthetic Trends vs. Formula-Free Tracks")
     st.markdown(r"""
-    Using unsupervised AI clustering, we categorized our 582 songs by their lyrical topics:
+    Using unsupervised AI clustering, we categorised our 582 songs by their lyrical topics:
     * **459 songs** clustered into **24 commercial theme categories** representing prevalent stylistic and aesthetic trends.
     * **123 songs (21.1%)** refused to fit any standard template—forming what we call **Formula-Free Tracks**.
     """)
@@ -451,7 +451,7 @@ Yet, this unclustered group achieved <b>42 Top 50 hits (34.1% hit rate)</b>, inc
         
         st.markdown(f"**Top Real-World Examples in '{chosen_theme_name}':**")
         
-        # For Formula-Free Tracks (Topic -1), prioritize diverse breakout artists (like Djo, Dominic/indie hits) 
+        # For Formula-Free Tracks (Topic -1), prioritise diverse breakout artists (like Djo, Dominic/indie hits) 
         # so readers don't assume only mega-stars occupy this group:
         if chosen_id == -1:
             spotlight_tracks = ["End of Beginning", "Sweater Weather", "Here With Me", "The Fate of Ophelia"]
