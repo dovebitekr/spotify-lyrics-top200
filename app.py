@@ -118,9 +118,9 @@ with st.container():
     st.markdown(r"""<div style="background-color: #0F172A; padding: 26px; border-radius: 12px; border: 1px solid #334155; margin-bottom: 25px;">
 <div style="display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 28px; font-size: 0.95rem; line-height: 1.65;">
 <div>
-<h4 style="color: #38BDF8; margin-top: 0; font-size: 1.25rem;">To Emerging Artists &amp; Songwriters: You Are Being Lied To</h4>
+<h4 style="color: #38BDF8; margin-top: 0; font-size: 1.25rem;">Rethinking the "Lyric Formula": What Chart Data Actually Tells Songwriters</h4>
 <p>
-If you spend time on songwriting blogs, TikTok masterclasses, or YouTube music tutorials, you've likely heard the modern "rules" of commercial songwriting:
+If you spend time on songwriting blogs, TikTok masterclasses, or YouTube music tutorials, you've likely heard common "rules" of commercial songwriting:
 <br><i>"Make your chorus repeat at least 40% of the song."</i>
 <br><i>"Keep your vocabulary super simple or listeners will skip."</i>
 <br><i>"Copy the latest diary-breakup formula if you want a streaming hit."</i>
@@ -357,29 +357,28 @@ If your song fails to chart or peaks at rank 150 instead of rank 20, <b>do not b
 # TAB 3: THEMES & THE FORMULA-FREE ADVANTAGE
 # ==============================================================================
 with tabs[2]:
-    st.header("3. Lyrical Themes & Why We Recommend Formula-Free Writing")
+    st.header("3. Lyrical Themes: Aesthetic Trends vs. Formula-Free Tracks")
     st.markdown(r"""
     Using unsupervised AI clustering, we categorized our 582 songs by their lyrical topics:
-    * **459 songs** clustered into **24 formulaic songwriting categories**.
+    * **459 songs** clustered into **24 commercial theme categories** representing prevalent stylistic and aesthetic trends.
     * **123 songs (21.1%)** refused to fit any standard template—forming what we call **Formula-Free Tracks**.
     """)
     
     col_t1, col_t2 = st.columns([1.1, 0.9])
     
     with col_t1:
-        st.subheader("Why You Shouldn't Chase 'High-Converting' Formulas")
+        st.subheader("Themes as Aesthetic Directions, Not Deterministic Formulas")
         st.markdown(r"""
-        At first glance, some lyric themes seem to have higher Top 50 rates (like *Confessional Pop* at 61% or *K-Pop Hooks* at 64%).
-        However, chart data proves this is a **Superstar Illusion**:
+        While lyric themes do not deterministically guarantee a Top 50 hit, they provide a valuable **snapshot of current commercial aesthetics** across the Global Top 200. However, songwriters should be wary of chasing seemingly "high-converting" themes:
         
         1. **The Crowded Cliché Trap (Nightlife Flirtation: 22.6% Top 50)**:  
            The single most common lyric formula on the chart is club party tracks ($n = 53$ songs), repeating words like `tonight, turn, stop, dance`. Yet only **22.6%** of these songs reach the Top 50. Writing generic club party lyrics simply buries you in a crowded lower tier.
         2. **Superstar Dominance (Confessional Pop: 61.1% Top 50)**:  
-           Themes like emotional breakup confessions show a 61% rate only because **Olivia Rodrigo and Ariana Grande** dropped entire albums into that cluster.
+           Themes like emotional breakup confessions show a 61% rate largely because **Olivia Rodrigo and Ariana Grande** dropped entire albums into that cluster. Their high hit rate reflects pre-existing artist fame, not the theme itself.
         """)
 
     with col_t2:
-        st.subheader("The Formula-Free Advantage")
+        st.subheader("The Formula-Free Reality")
         st.markdown(r"""<div style="background-color: #064E3B; padding: 18px 20px; border-radius: 8px; border-left: 4px solid #10B981; color: #ECFDF5;">
 <h5 style="margin-top:0; color: #A7F3D0; font-size: 1.1rem;">Why Originality Wins Over Formulas</h5>
 <p style="font-size: 0.92rem; line-height: 1.6; margin-bottom: 0;">
@@ -387,7 +386,7 @@ The <b>123 Formula-Free Tracks</b> are songs with distinctive, non-formulaic lyr
 <br><br>
 Yet, this unclustered group achieved <b>42 Top 50 hits (34.1% hit rate)</b>, including massive #1 smashes like <b>Djo's <i>End of Beginning</i></b>, <b>Taylor Swift's <i>The Fate of Ophelia</i></b>, and <b>Harry Styles' <i>American Girls</i></b>.
 <br><br>
-<b>Takeaway for New Artists:</b> Don't copy crowded formulas. Writing formula-free, personal stories lets you stand out!
+<b>Takeaway for New Artists:</b> Commercial clusters reflect current aesthetic trends that you can explore, but writing formula-free, personal stories gives you the freedom to stand out!
 </p>
 </div>""", unsafe_allow_html=True)
 
@@ -593,5 +592,13 @@ with tabs[4]:
             ),
             use_container_width=True
         )
+
+# ==============================================================================
+# FOOTER: COURSE DELIVERABLE & AI TRANSPARENCY
+# ==============================================================================
+st.markdown("---")
+st.caption(
+    "Created as an online deliverable for our course mini-project, with code and layout generated using Google Gemini."
+)
 
 
