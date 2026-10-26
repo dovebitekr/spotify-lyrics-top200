@@ -431,7 +431,19 @@ Yet, this unclustered group achieved <b>42 Top 50 hits (34.1% hit rate)</b>, inc
         c_meta3.metric("Core Keywords", kw[:40] + ("..." if len(kw) > 40 else ""))
         
         st.markdown(f"**Top Real-World Examples in '{chosen_theme_name}':**")
-        examples_to_show = subset.sort_values(by="best_rank_this_year").head(4)
+        
+        # For Formula-Free Tracks (Topic -1), prioritize diverse breakout artists (like Djo, Dominic/indie hits) 
+        # so readers don't assume only mega-stars occupy this group:
+        if chosen_id == -1:
+            spotlight_tracks = ["End of Beginning", "Sweater Weather", "Here With Me", "The Fate of Ophelia"]
+            subset_spotlight = subset[subset["track_name"].isin(spotlight_tracks)].copy()
+            # If any are missing, fill from top sorted
+            if len(subset_spotlight) < 4:
+                remaining = subset[~subset["track_name"].isin(spotlight_tracks)].sort_values(by="best_rank_this_year")
+                subset_spotlight = pd.concat([subset_spotlight, remaining]).head(4)
+            examples_to_show = subset_spotlight
+        else:
+            examples_to_show = subset.sort_values(by="best_rank_this_year").head(4)
         
         cols = st.columns(min(len(examples_to_show), 4))
         for idx, (_, row) in enumerate(examples_to_show.iterrows()):
@@ -444,6 +456,11 @@ Yet, this unclustered group achieved <b>42 Top 50 hits (34.1% hit rate)</b>, inc
                 <span style="font-size: 0.8rem; color: #64748B;">Year: {row.get('release_year', 'N/A')}</span>
                 </div>
                 """, unsafe_allow_html=True)
+                
+        if chosen_id == -1:
+            st.caption("ℹ️ **Why are songs like Taylor Swift's *The Fate of Ophelia* in this group?** "
+                       "Our AI groups songs purely by lyric text—not artist fame. While pop stars can land here when writing rich, literary metaphors (e.g. Shakespearean Ophelia imagery), "
+                       "breakout indie tracks like Djo's *End of Beginning* prove that writing personal, formula-free lyrics lets new artists score massive #1 hits too!")
 
 # ==============================================================================
 # TAB 4: CASE STUDIES & REAL TAKEAWAYS
