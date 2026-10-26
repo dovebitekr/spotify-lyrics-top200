@@ -75,11 +75,23 @@ streamlit run app.py
 
 ---
 
-## Limitations & Future Work
+## Limitations
 
-* **Selection Bias:** By sampling exclusively from the Spotify Top 200, the dataset only contains songs that have already achieved global commercial success. A future extension would include a non-charting control group.
-* **Legacy Tracks vs. New Releases:** Pre-2024 legacy hits had a 45.1% Top 50 rate compared to 23.7% for newer releases, reflecting persistent streaming longevity rather than purely modern lyrical trends.
-* **Unmeasured Factors:** Popularity is heavily influenced by musical components (tempo, vocal delivery, production) and promotional reach, which are beyond pure lyric text.
+* **Selection Bias:** We only analyzed songs that already made the Spotify Top 200. Because entering the charts is already an outlier event, our data only compares "hits" against "bigger hits," rather than predicting how an unreleased song breaks into the charts.
+* **Legacy Tracks vs. New Releases:** Older catalog songs (pre-2024 releases like holiday classics or timeless hits) had a 45.1% Top 50 hit rate compared to 23.7% for newer songs, driven by established streaming momentum rather than current lyrical trends.
+* **Missing Musical Factors:** A hit song is more than its lyrics. Production quality, catchy chord progressions, vocal delivery, tempo, and marketing budgets all heavily influence chart success.
+
+---
+
+## Future Work
+
+If we expand this project in the future, promising next steps include:
+
+1. **Comparing Multiple Platforms:** Comparing Spotify charts with Apple Music, YouTube Music, and TikTok to see if lyrical hooks matter more on short-form video platforms.
+2. **Translating Global & Multilingual Hits:** Using machine translation to include non-English hits (Spanish, K-Pop, Japanese, Portuguese), which make up a massive portion of the global music market.
+3. **Adding a Non-Charting Control Group:** Sampling songs that never made the charts to directly model what helps an indie artist break into the Top 200 in the first place.
+4. **Multi-Modal AI (Audio + Lyrics):** Combining lyrical embeddings with musical audio features (tempo, danceability, energy, acousticness) to model how lyrics and beats interact.
+5. **Multi-Year Seasonal Tracking:** Collecting 3 to 5 years of weekly charts to properly test our original hypothesis: do listeners actually stream more melancholic lyrics in the autumn and party anthems in the summer?
 
 ---
 
