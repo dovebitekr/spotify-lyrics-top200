@@ -17,3 +17,9 @@ spotify_data/final_dataset_for_ml_enriched.csv
 meta/
 sandbox.ipynb
 reports/
+# Technical Report & Local Word/PDF Generation
+*Technical_Report*
+generate_word_report.py
+artifacts/report_figures/
+reports/
+app_technical_backup.py
