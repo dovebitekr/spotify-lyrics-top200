@@ -16,16 +16,16 @@ This project explores one year of the Spotify Global Weekly Top 200 charts combi
 
 ## Key Takeaways for Songwriters
 
-Rather than treating lyrics as a magic formula for virality, our findings offer practical, grounded guidance:
+Rather than treating lyrics as a magic formula for virality, our findings offer practical, scientifically grounded guidance:
 
-1. **You Don't Need to Follow a Pop Formula:**
-   Using BERTopic, we clustered 582 charting songs into 24 distinct lyrical themes. However, over **21% of all charting songs (123 tracks)** formed unclustered outliers. These formula-free, unique songs achieved a **34.1% Top 50 hit rate**, proving that unique artistic expression can perform just as well as mainstream pop tropes.
+1. **No Thematic "Silver Bullet" (Beware of Surface Illusions):**
+   Surface-level averages can easily deceive. For example, a small cluster like *Moody Alt-Pop* (themes of darkness, dreams, and misery) initially seemed to boast a high average chart rank. However, this was simply driven by a few superstar hits in a small sample. When rigorously evaluated with machine learning, adding lyrical topic embeddings provided **zero predictive improvement (ROC-AUC ~0.504)** over baseline models. There is no specific lyrical subject that mechanically guarantees chart success.
 
-2. **Niche Opportunities (Unmet Market Demand):**
-   While party anthems and street rap dominate chart volume, certain niche clusters—such as *Moody Alt-Pop* (themes of darkness, dreams, and vulnerability)—exhibited a very high average chart rank despite low representation in the corpus. This suggests potential unmet listener demand for deeper, atmospheric songwriting.
+2. **Freedom from Formulaic Pop Tropes:**
+   While party anthems and breakup tropes take up large portions of the charts, over **21% of all charting songs (123 tracks)** formed unclustered outliers. These formula-free, unique songs achieved a **34.1% Top 50 hit rate**. Aspiring writers do not need to force themselves into generic pop clichés—unconventional storytelling performs just as well as standard tropes.
 
-3. **Lyrics Alone Don't Guarantee a Hit:**
-   Comparing a metadata baseline model (M1) against an embedding-enhanced model (M2) using L2-regularised Logistic Regression and 5-fold Artist-Grouped Cross-Validation yielded an average ROC-AUC of **~0.504** (baseline). In other words, once superstar artist bias (e.g., Taylor Swift, Drake) is controlled for, lyrical content alone cannot mechanically force a hit without complementary production, melody, and artist brand.
+3. **Lyrics Do Not Exist in a Vacuum:**
+   Because machine learning models cannot predict Top 50 placement from lyrics alone, success is fundamentally driven by unmeasured musical factors (production quality, melodic hooks, vocal delivery, tempo) and artist reach. For songwriters, lyrical authenticity matters more than chasing "viral keywords."
 
 ---
 
