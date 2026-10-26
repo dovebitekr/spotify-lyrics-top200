@@ -22,33 +22,33 @@ TOPICS_FULL_PATH = PROJECT_ROOT / "artifacts" / "bertopic_topic_metrics.csv"
 SONG_TOPICS_PATH = PROJECT_ROOT / "artifacts" / "bertopic_song_topics.csv"
 WORDCLOUD_FIG_PATH = PROJECT_ROOT / "artifacts" / "topic_cluster_wordclouds.png"
 
-# Descriptive Names for the 24 Lyrical Themes
+# Descriptive & Engaging Names for the Lyrical Themes
 TOPIC_DISPLAY_ALIASES = {
-    -1: "Unclustered / Outliers (Unique Lyrical Themes)",
-    0: "Club Grooves & Nightlife Flirtation",
-    1: "Street Rap & Trap Anthems",
-    2: "Urban Pop, Style & Late-Night Confidence",
-    3: "High-Energy K-Pop & Performance Hooks",
-    4: "Dark Alt-Pop, Angst & Obsession",
-    5: "Rhythmic Dance-Pop & Party Anthems",
-    6: "Heartbreak, Letting Go & Breakup Ballads",
-    7: "Classic Pop Storytelling & Nostalgia",
-    8: "Confessional Pop & Emotional Vulnerability",
-    9: "Melancholic Reflection, Summer & Solitude",
-    10: "Post-Breakup Distance & Holding On",
-    11: "Contemporary R&B, Swag & Collabs",
-    12: "Funk, Classic Rhythm & Nostalgic Chants",
-    13: "Melodic Romance & Stadium Hooks",
-    14: "Folk-Pop Introspection & Acoustic Roots",
-    15: "Indie Folk Melancholy & Soulful R&B",
-    16: "Atmospheric Midnight Romance",
-    17: "Dream Pop & Slow-Burn Longing",
-    18: "Emotional Diving, Pain & Release",
-    19: "Hip-Hop Braggadocio & Hustle",
-    20: "Latin Pop, Global Grooves & Summer Heat",
-    21: "Raw Acoustic Pain & Folk-Rock Grit",
-    22: "Theatrical Soundtracks & Dramatic Ballads",
-    23: "Motivational Anthems & Fighter Spirit"
+    -1: "Formula-Free Tracks (Unique & Non-Formulaic Lyrics)",
+    0: "Nightlife Flirtation & Club Clichés",
+    1: "Street Rap, Hustle & Flex Anthems",
+    2: "Late-Night Confidence, Swagger & Urban Style",
+    3: "High-Energy K-Pop Hooks & Idol Anthems",
+    4: "Dark Alt-Pop, Obsession & Teenage Angst",
+    5: "Pure Dancefloor Rhythm & Party Hooks",
+    6: "Acoustic Heartbreak & Breakup Ballads",
+    7: "Nostalgic Storytelling & Classic Pop Melodies",
+    8: "Confessional Pop & Emotional Diary Entries",
+    9: "Summer Memories, Solitude & Mellow Reflection",
+    10: "Conversational Post-Breakup Aftermath",
+    11: "Contemporary R&B Grooves & Smooth Features",
+    12: "Retro Funk, Rhythm Chants & Groove Classics",
+    13: "Stadium Pop Anthems & Big Romantic Hooks",
+    14: "Indie Acoustic Roots & Introspective Folk",
+    15: "Soulful R&B & Late-Night Melancholy",
+    16: "Atmospheric Midnight R&B & Sensual Hooks",
+    17: "Dreamy Pop Vibes & Slow-Burn Longing",
+    18: "Deep Emotional Release & Cathartic Anthems",
+    19: "Hard-Hitting Rap Braggadocio & Flex Bars",
+    20: "Global Rhythms, Latin Grooves & Summer Heat",
+    21: "Raw Folk-Rock Grit & Unfiltered Acoustic Pain",
+    22: "Theatrical Dramatic Ballads & Soundtracks",
+    23: "Triumphant Motivation & Fighter Anthems"
 }
 
 def _calc_line_repetition(text: str) -> float:
@@ -147,7 +147,7 @@ We analyzed <b>582 English charting songs</b> across 53 weekly Spotify Global To
 tabs = st.tabs([
     "1. Busting 3 Lyric Myths",
     "2. The 50/50 Reality Check",
-    "3. Themes & The Outlier Advantage",
+    "3. Themes & Formula-Free Advantage",
     "4. Case Studies & Real Takeaways",
     "5. Interactive Song Explorer"
 ])
@@ -354,54 +354,96 @@ If your song fails to chart or peaks at rank 150 instead of rank 20, <b>do not b
 </div>""", unsafe_allow_html=True)
 
 # ==============================================================================
-# TAB 3: THEMES & THE OUTLIER ADVANTAGE (BERTopic & WordClouds)
+# TAB 3: THEMES & THE FORMULA-FREE ADVANTAGE
 # ==============================================================================
 with tabs[2]:
-    st.header("3. Lyrical Themes & Why We Recommend the 'Outlier Group'")
+    st.header("3. Lyrical Themes & Why We Recommend Formula-Free Writing")
     st.markdown(r"""
-    Using unsupervised AI clustering, we grouped 582 songs into lyrical themes.
-    * **459 songs** fell into **24 formulaic topic clusters**.
-    * **123 songs (21.1%)** told unique, unclustered stories that did not fit standard templates—assigned to **`Topic -1` (The Outlier Group)**.
+    Using unsupervised AI clustering, we categorized our 582 songs by their lyrical topics:
+    * **459 songs** clustered into **24 formulaic songwriting categories**.
+    * **123 songs (21.1%)** refused to fit any standard template—forming what we call **Formula-Free Tracks**.
     """)
     
     col_t1, col_t2 = st.columns([1.1, 0.9])
     
     with col_t1:
-        st.subheader("Why You Shouldn't Chase Formulaic 'High-Converting' Themes")
+        st.subheader("Why You Shouldn't Chase 'High-Converting' Formulas")
         st.markdown(r"""
         At first glance, some lyric themes seem to have higher Top 50 rates (like *Confessional Pop* at 61% or *K-Pop Hooks* at 64%).
-        However, the data shows this is a **Superstar Illusion**:
+        However, chart data proves this is a **Superstar Illusion**:
         
-        1. **The Crowded Cliché Trap (Topic 0: 22.6% Top 50)**:  
-           The single most common lyric formula on the chart is *Club Grooves & Nightlife Flirtation* ($n = 53$ songs), repeating words like `tonight, turn, stop, dance`. Yet only **22.6%** of these songs reach the Top 50. Writing generic club party lyrics simply buries you in a crowded lower tier.
-        2. **Superstar Dominance (Topic 8: 61.1% Top 50)**:  
+        1. **The Crowded Cliché Trap (Nightlife Flirtation: 22.6% Top 50)**:  
+           The single most common lyric formula on the chart is club party tracks ($n = 53$ songs), repeating words like `tonight, turn, stop, dance`. Yet only **22.6%** of these songs reach the Top 50. Writing generic club party lyrics simply buries you in a crowded lower tier.
+        2. **Superstar Dominance (Confessional Pop: 61.1% Top 50)**:  
            Themes like emotional breakup confessions show a 61% rate only because **Olivia Rodrigo and Ariana Grande** dropped entire albums into that cluster.
         """)
 
     with col_t2:
-        st.subheader("The Outlier Advantage: Embrace Topic -1")
+        st.subheader("The Formula-Free Advantage")
         st.markdown(r"""<div style="background-color: #064E3B; padding: 18px 20px; border-radius: 8px; border-left: 4px solid #10B981; color: #ECFDF5;">
 <h5 style="margin-top:0; color: #A7F3D0; font-size: 1.1rem;">Why Originality Wins Over Formulas</h5>
 <p style="font-size: 0.92rem; line-height: 1.6; margin-bottom: 0;">
-The <b>123 songs in Topic -1 (The Outlier Group)</b> are songs with distinctive, non-formulaic lyrics that refused to fit into standard AI clusters.
+The <b>123 Formula-Free Tracks</b> are songs with distinctive, non-formulaic lyrics that refused to fit into standard AI clusters.
 <br><br>
 Yet, this unclustered group achieved <b>42 Top 50 hits (34.1% hit rate)</b>, including massive #1 smashes like <b>Djo's <i>End of Beginning</i></b>, <b>Taylor Swift's <i>The Fate of Ophelia</i></b>, and <b>Harry Styles' <i>American Girls</i></b>.
 <br><br>
-<b>Takeaway for New Artists:</b> Don't copy crowded formulas. Write distinctive stories that stand out!
+<b>Takeaway for New Artists:</b> Don't copy crowded formulas. Writing formula-free, personal stories lets you stand out!
 </p>
 </div>""", unsafe_allow_html=True)
 
     if WORDCLOUD_FIG_PATH.exists():
         st.markdown("---")
-        st.subheader("Visual Proof: Cliché Vocabularies vs. The Outlier Group")
+        st.subheader("Visual Proof: Formulaic Vocabularies vs. Formula-Free Tracks")
         st.markdown(r"""
-        Notice how generic clusters repeat formulaic words, whereas the **Outlier Group (bottom-right)** uses a rich, unformulaic vocabulary:
+        Notice how generic clusters repeat formulaic words, whereas **Formula-Free Tracks (bottom-right)** use a rich, unformulaic vocabulary:
         """)
         st.image(
             str(WORDCLOUD_FIG_PATH),
-            caption="WordClouds of Representative Clusters: Topic 0 (Club Clichés, 22.6% Top 50), Topic 3 (K-Pop Hooks, 64.3%), Topic 8 (Superstar Pop, 61.1%), and Topic -1 (The Outlier Group, n = 123 songs, 34.1% Top 50 rate).",
+            caption="WordClouds of Representative Clusters: Topic 0 (Club Clichés, 22.6% Top 50), Topic 3 (K-Pop Hooks, 64.3%), Topic 8 (Superstar Pop, 61.1%), and Topic -1 (Formula-Free Tracks, n = 123 songs, 34.1% Top 50 rate).",
             use_container_width=True
         )
+
+    st.markdown("---")
+    st.subheader("Interactive Theme Showcase: Examine Real Chart Songs in Each Category")
+    st.markdown("Pick any lyrical theme below to see its real-world chart hit rate, core vocabulary, and famous song examples:")
+    
+    if SONG_TOPICS_PATH.exists():
+        theme_songs_df = pd.read_csv(SONG_TOPICS_PATH)
+        theme_songs_df["Display Name"] = theme_songs_df["topic_id"].map(TOPIC_DISPLAY_ALIASES).fillna("Other")
+        
+        # Prepare theme metrics
+        theme_list = [v for k, v in TOPIC_DISPLAY_ALIASES.items()]
+        chosen_theme_name = st.selectbox("Select a lyrical category to inspect:", theme_list, index=0)
+        
+        # Find chosen topic_id
+        chosen_id = [k for k, v in TOPIC_DISPLAY_ALIASES.items() if v == chosen_theme_name][0]
+        subset = theme_songs_df[theme_songs_df["topic_id"] == chosen_id].copy()
+        
+        n_total = len(subset)
+        t50_count = (subset["best_rank_this_year"] <= 50).sum()
+        hit_rate = (t50_count / n_total * 100) if n_total > 0 else 0.0
+        
+        kw = subset["topic_keywords"].iloc[0] if (len(subset) > 0 and pd.notna(subset["topic_keywords"].iloc[0])) else "Diverse unclustered vocabulary"
+        
+        c_meta1, c_meta2, c_meta3 = st.columns(3)
+        c_meta1.metric("Songs in Category", f"{n_total} songs")
+        c_meta2.metric("Top 50 Hits", f"{t50_count} hits ({hit_rate:.1f}%)")
+        c_meta3.metric("Core Keywords", kw[:40] + ("..." if len(kw) > 40 else ""))
+        
+        st.markdown(f"**Top Real-World Examples in '{chosen_theme_name}':**")
+        examples_to_show = subset.sort_values(by="best_rank_this_year").head(4)
+        
+        cols = st.columns(min(len(examples_to_show), 4))
+        for idx, (_, row) in enumerate(examples_to_show.iterrows()):
+            with cols[idx]:
+                st.markdown(f"""
+                <div style="background-color: #1E293B; padding: 14px; border-radius: 8px; border-top: 3px solid #38BDF8; font-size: 0.9rem;">
+                <b style="color: #F8FAFC; font-size: 0.95rem;">{row['track_name']}</b><br>
+                <span style="color: #94A3B8;">{row['artist_names']}</span><br>
+                <span style="color: #10B981; font-weight: bold;">Peak Rank: #{int(row['best_rank_this_year'])}</span><br>
+                <span style="font-size: 0.8rem; color: #64748B;">Year: {row.get('release_year', 'N/A')}</span>
+                </div>
+                """, unsafe_allow_html=True)
 
 # ==============================================================================
 # TAB 4: CASE STUDIES & REAL TAKEAWAYS
@@ -418,7 +460,7 @@ with tabs[3]:
         {
             "Song & Artist": "Djo — End of Beginning",
             "Chart Peak": "#1 Global Smash",
-            "Lyrical Category": "Topic -1 (Outlier Group — Non-Formulaic)",
+            "Lyrical Category": "Formula-Free Tracks (Non-Formulaic)",
             "What the Lyrics Do": "A nostalgic, highly specific reflection on leaving Chicago (\"and when I'm back in Chicago, I feel it\").",
             "What Actually Made It #1": "Unclustered, original lyrics went viral on TikTok two years after release, paired with Joe Keery's rising fame."
         },
@@ -468,7 +510,7 @@ with tabs[3]:
     with checklist_col2:
         st.markdown(r"""
         #### ✅ Where to Spend Your Creative Energy Instead
-        * **Target the Outlier Advantage:** Write specific, honest, personal stories (like Djo's *End of Beginning*).
+        * **Target the Formula-Free Advantage:** Write specific, honest, personal stories (like Djo's *End of Beginning*).
         * **Focus on dynamic vocal performance:** How you sing a line matters infinitely more than the text transcript.
         * **Craft 15-second audio moments:** Songs explode today because a specific vocal break or melody fits TikTok/Reels.
         * **Build an organic community:** Pre-existing fan excitement is what actually creates day-one streaming peaks.
