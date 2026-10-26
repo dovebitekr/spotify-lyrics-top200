@@ -423,12 +423,32 @@ Yet, this unclustered group achieved <b>42 Top 50 hits (34.1% hit rate)</b>, inc
         t50_count = (subset["best_rank_this_year"] <= 50).sum()
         hit_rate = (t50_count / n_total * 100) if n_total > 0 else 0.0
         
-        kw = subset["topic_keywords"].iloc[0] if (len(subset) > 0 and pd.notna(subset["topic_keywords"].iloc[0])) else "Diverse unclustered vocabulary"
+        # Parse keywords into clean list for badges
+        raw_kw = subset["topic_keywords"].iloc[0] if len(subset) > 0 else None
+        if pd.isna(raw_kw) or not str(raw_kw).strip():
+            keyword_list = ["unique storytelling", "personal", "literary", "unclustered", "original"]
+        else:
+            try:
+                import ast
+                keyword_list = ast.literal_eval(str(raw_kw))
+            except Exception:
+                keyword_list = [w.strip(" '[]\"") for w in str(raw_kw).split(",") if w.strip()]
         
-        c_meta1, c_meta2, c_meta3 = st.columns(3)
+        c_meta1, c_meta2 = st.columns(2)
         c_meta1.metric("Songs in Category", f"{n_total} songs")
         c_meta2.metric("Top 50 Hits", f"{t50_count} hits ({hit_rate:.1f}%)")
-        c_meta3.metric("Core Keywords", kw[:40] + ("..." if len(kw) > 40 else ""))
+        
+        # Tag Badges for Core Keywords
+        badges_html = " ".join([
+            f'<span style="display: inline-block; background-color: #1E293B; color: #38BDF8; border: 1px solid #334155; padding: 4px 10px; margin: 3px 4px 3px 0; border-radius: 14px; font-size: 0.82rem; font-weight: 500;">#{word}</span>'
+            for word in keyword_list
+        ])
+        st.markdown(f"""
+        <div style="margin: 12px 0 16px 0; padding: 12px 16px; background-color: #0F172A; border-radius: 8px; border: 1px solid #334155;">
+        <span style="font-size: 0.88rem; font-weight: 600; color: #94A3B8; margin-right: 8px;">🔑 All Core Keywords:</span>
+        <div style="margin-top: 6px;">{badges_html}</div>
+        </div>
+        """, unsafe_allow_html=True)
         
         st.markdown(f"**Top Real-World Examples in '{chosen_theme_name}':**")
         
