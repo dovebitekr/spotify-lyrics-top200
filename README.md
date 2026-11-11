@@ -1,4 +1,12 @@
-# Spotify Top 200 Lyric Analysis: Guidance for Aspiring Songwriters
+# Spotify Top 200 Lyric Analysis: Guidance for Aspiring Songwriters 🎵
+
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://spotify-lyrics-top200.streamlit.app/)
+![Python](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python&logoColor=white)
+![NLP](https://img.shields.io/badge/NLP-BERTopic%20%7C%20SentenceTransformers-orange)
+![Scikit-Learn](https://img.shields.io/badge/ML-Scikit--Learn-F7931E?logo=scikit-learn&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-green)
+
+> **Live Interactive Web App:** 👉 [https://spotify-lyrics-top200.streamlit.app/](https://spotify-lyrics-top200.streamlit.app/)
 
 When aspiring songwriters sit down to write their next track, they often wonder: **"What should I write about?"** Should you follow proven pop themes like nightlife and heartbreak, or is there room for unconventional, niche storytelling?
 
@@ -29,9 +37,32 @@ Rather than treating lyrics as a magic formula for virality, our findings offer 
 
 ---
 
+## Machine Learning & Benchmark Results
+
+Many music prediction projects report unrealistically high ROC-AUC scores (0.75–0.85) simply because standard random cross-validation allows the model to memorise superstar artists (e.g. Taylor Swift, Drake, The Weeknd) across train and test sets. To prevent this **Artist Data Leakage**, we strictly enforced **5-Fold Artist-Grouped Cross-Validation**.
+
+| Model Architecture | Input Features | Validation Strategy | Mean ROC-AUC | Key Finding |
+|---|---|---|:---:|---|
+| **M1: Baseline** | Release Year, Genre, Metadata | 5-Fold Artist-Grouped CV | **0.502** | Metadata alone cannot predict Top 50 hits |
+| **M2: Topic Augmented** | Metadata + BERTopic Dense Embeddings | 5-Fold Artist-Grouped CV | **0.504** | Pure lyrics provide **zero statistical lift** over random guess |
+| *Naïve Baseline (Unchecked)* | Pure Lyric Embeddings | Standard Random K-Fold | *~0.68+* | **Data Leakage:** Model memorises superstars, not lyrical quality |
+
+---
+
+## Topic Modeling Discoveries (BERTopic)
+
+Using Sentence-Transformers (`all-MiniLM-L6-v2`), UMAP for dimensionality reduction, and HDBSCAN, we identified 24 distinct thematic clusters across 582 charting tracks. Class-based TF-IDF (c-TF-IDF) was used to extract representative keywords for each theme:
+
+![Topic Cluster Wordclouds](artifacts/topic_cluster_wordclouds.png)
+
+* **Mainstream Dominance:** Clustered themes are heavily populated by standard commercial tropes: club nightlife, party hooks, and relationship aftermath.
+* **The Formula-Free Cluster (Topic -1):** 123 songs did not fit standard tropes, featuring rich narrative lyrics (e.g. Djo, Dominic Fike, Chappell Roan) and boasting an impressive **34.1% Top 50 hit rate**.
+
+---
+
 ## The Interactive Web Dashboard
 
-To make these 582 songs and 24 lyrical themes genuinely usable for creators and researchers, we built an interactive dashboard with **Streamlit**:
+To make these 582 songs and 24 lyrical themes genuinely usable for creators and researchers, we built an interactive dashboard with **Streamlit** (Live at [spotify-lyrics-top200.streamlit.app](https://spotify-lyrics-top200.streamlit.app/)):
 
 * **Model Comparison & Baselines:** Inspect the ROC-AUC evaluation across models and see why artist-grouped cross-validation is essential to avoid data leakage.
 * **The 24 Lyrical Themes:** Browse each cluster's core keywords (c-TF-IDF tags), average peak ranks, and Top 50 hit rates.
@@ -108,7 +139,7 @@ If we expand this project in the future, promising next steps include:
 ├── artifacts/
 │   ├── bertopic_song_topics.csv    # Clustered song dataset with assigned topics
 │   ├── bertopic_topic_metrics.csv  # Topic metadata, hit rates, and keywords
-│   └── topic_cluster_wordclouds.png
+│   └── topic_cluster_wordclouds.png # 24-cluster wordcloud visualization
 └── spotify_data/
     └── final_dataset_for_ml_lyrics_en.csv # Cleaned modeling dataset
 ```
